@@ -141,117 +141,128 @@ class _CategoriesPageState extends State<CategoriesPage> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : searchQuery.isNotEmpty
-              ? SearchResults(query: searchQuery)
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 12),
+    ? const Center(child: CircularProgressIndicator())
+    : searchQuery.isNotEmpty
+        ? SearchResults(query: searchQuery)
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
 
-                      // Premium-style genre chips
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: genres.map((genre) {
-                            final isSelected = selectedGenre == genre['name'];
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedGenre = genre['name'];
-                                  selectedGenreId = genre['id'];
-                                });
-                                _loadContentByGenre(selectedGenreId);
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  color: isSelected ? Colors.blueAccent : Colors.grey[850],
-                                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.blueAccent.withOpacity(0.4),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                      : [],
-                                ),
-                                child: Text(
-                                  genre['name'],
-                                  style: GoogleFonts.poppins(
-                                    color: isSelected ? Colors.white : Colors.white70,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
+              // Genre chips
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: genres.map((genre) {
+                      final isSelected = selectedGenre == genre['name'];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedGenre = genre['name'];
+                              selectedGenreId = genre['id'];
+                            });
+                            _loadContentByGenre(selectedGenreId);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              color: isSelected ? Colors.blueAccent : Colors.grey[850],
+                              border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.blueAccent.withOpacity(0.4),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Text(
+                              genre['name'],
+                              style: GoogleFonts.poppins(
+                                color: isSelected ? Colors.white : Colors.white70,
+                                fontWeight: FontWeight.w500,
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Grid of content cards
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Wrap(
-                          spacing: 16,
-                          runSpacing: 20,
-                          children: items.map((item) {
-                            final title = selectedType == 'Movies' ? item['title'] : item['name'];
-
-                            return SizedBox(
-                              width: 140,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  HoverMovieCard(
-                                    item: item,
-                                    height: 200,
-                                    width: 140,
-                                    onTap: () async {
-                                      final shouldPlay = await showDialog<bool>(
-                                        context: context,
-                                        builder: (_) => MovieInfoDialog(item: item),
-                                      );
-
-                                      if (shouldPlay == true && context.mounted) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => DetailPage(item: item),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    title ?? '',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
+                      );
+                    }).toList(),
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Grid view of content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: GridView.builder(
+                    itemCount: items.length,
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160, // Max width of each card
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20, //between card
+                    childAspectRatio: 0.6, //space between card in a row
+                  ),
+
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final title = selectedType == 'Movies'
+                          ? item['title']
+                          : item['name'];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          HoverMovieCard(
+                            item: item,
+                            height: 200,
+                            width: double.infinity,
+                            onTap: () async {
+                              final shouldPlay = await showDialog<bool>(
+                                context: context,
+                                builder: (_) => MovieInfoDialog(item: item),
+                              );
+
+                              if (shouldPlay == true && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => DetailPage(item: item),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            title ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+
     );
   }
 }
