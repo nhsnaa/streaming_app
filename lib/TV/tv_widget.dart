@@ -110,7 +110,7 @@ class _TVWidgetState extends State<TVWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Thumbnail with tap to open dialog
-                        Stack(
+                        Stack( 
                           children: [
                             GestureDetector(
                               onTap: () {
