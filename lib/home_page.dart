@@ -14,7 +14,6 @@ import 'package:streaming_app/TV/top_rated_TV.dart';
 // Importing app modules
 import 'modules/categories_page.dart';
 import 'modules/favourites_page.dart';
-import 'modules/inbox_page.dart';
 import 'modules/profile_page.dart';
 import 'search_results.dart';
 
@@ -74,9 +73,8 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return const FavouritesPage();
       case 3:
-        return const InboxPage();
-      case 4:
         return const ProfilePage();
+    
       default:
         return const Center(child: Text('Page not found'));
     }
@@ -163,7 +161,6 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Categories'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourites'),
-          BottomNavigationBarItem(icon: Icon(Icons.inbox), label: 'Inbox'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
