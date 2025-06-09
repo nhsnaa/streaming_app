@@ -98,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
               _showImagePicker(
                 type: 'background',
                 images: [
-                  'assets/images/backgrounds/profile_bg.jpg',
+                  'assets/images/backgrounds/bg1.jpg',
                   'assets/images/backgrounds/bg2.jpg',
                   'assets/images/backgrounds/bg3.jpg',
                   'assets/images/backgrounds/bg4.jpg',
@@ -122,31 +122,40 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showImagePicker({
-    required String type,
-    required List<String> images,
-    required String defaultImage,
-  }) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Choose Your ${type == 'avatar' ? 'Avatar' : 'Background'}',
-                style: const TextStyle(fontSize: 18, color: Colors.white)),
-            const SizedBox(height: 10),
-            GridView.builder(
+  required String type,
+  required List<String> images,
+  required String defaultImage,
+}) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.grey[900],
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) => Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Choose Your ${type == 'avatar' ? 'Avatar' : 'Background'}',
+            style: const TextStyle(fontSize: 18, color: Colors.white),
+          ),
+          const SizedBox(height: 16),
+          
+          // Use SizedBox to prevent infinite height error
+          SizedBox(
+            height: type == 'avatar' ? 180 : 200,
+            child: GridView.builder(
               shrinkWrap: true,
               itemCount: images.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: type == 'avatar' ? 5 : 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
+              scrollDirection: Axis.horizontal, // Make it horizontal scroll
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: type == 'avatar' ? 100 : 180,
+                mainAxisExtent: type == 'avatar' ? 100 : 280, // width of each item
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: type == 'avatar' ? 1 : 2.5, // Wider for backgrounds
               ),
               itemBuilder: (context, index) {
                 return GestureDetector(
@@ -168,33 +177,41 @@ class _ProfilePageState extends State<ProfilePage> {
                         )
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(images[index], fit: BoxFit.cover, height: 80),
+                          child: Image.asset(
+                            images[index],
+                            fit: BoxFit.cover,
+                          ),
                         ),
                 );
               },
             ),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  if (type == 'avatar') {
-                    _selectedAvatar = defaultImage;
-                  } else {
-                    _selectedBackground = defaultImage;
-                  }
-                  _updateUserData();
-                });
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.restore, color: Colors.white),
-              label: Text('Use Default ${type == 'avatar' ? 'Avatar' : 'Background'}',
-                  style: const TextStyle(color: Colors.white)),
+          ),
+          
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: () {
+              setState(() {
+                if (type == 'avatar') {
+                  _selectedAvatar = defaultImage;
+                } else {
+                  _selectedBackground = defaultImage;
+                }
+                _updateUserData();
+              });
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.restore, color: Colors.white),
+            label: Text(
+              'Use Default ${type == 'avatar' ? 'Avatar' : 'Background'}',
+              style: const TextStyle(color: Colors.white),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildInfoTile(IconData icon, String label, String value) {
     return Card(
@@ -232,57 +249,74 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
             children: [
-              Stack(
-                children: [
-                  Container(
-                    height: 220,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(_selectedBackground),
+              Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800), // 👈 limits the width
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Background image with rounded corners
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        _selectedBackground,
+                        width: double.infinity,
+                        height: 300,
                         fit: BoxFit.cover,
                       ),
-                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 12,
-                    right: 12,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Colors.blueAccent, Colors.purpleAccent],
+
+                    // Dark overlay
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      padding: const EdgeInsets.all(3),
-                      child: CircleAvatar(
-                        radius: 55,
-                        backgroundImage: AssetImage(_selectedAvatar),
+                    ),
+
+                    // Avatar at bottom-left
+                    Positioned(
+                      bottom: -40,
+                      left: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Colors.blueAccent, Colors.purpleAccent],
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(3),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage: AssetImage(_selectedAvatar),
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 12,
-                    right: 140,
-                    child: Material(
-                      color: Colors.black87,
-                      shape: const CircleBorder(side: BorderSide(color: Colors.white24)),
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        onPressed: _showEditOptions,
-                        iconSize: 26,
-                        padding: const EdgeInsets.all(6),
+
+                    // Edit button to the right of avatar
+                    Positioned(
+                      bottom: -28,
+                      left: 130,
+                      child: Material(
+                        color: Colors.black87,
+                        shape: const CircleBorder(side: BorderSide(color: Colors.white24)),
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: _showEditOptions,
+                          iconSize: 26,
+                          padding: const EdgeInsets.all(6),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+            ),
+            const SizedBox(height: 20), // 👈 Space for the overlapping avatar
+
+
               const SizedBox(height: 32),
               _buildInfoTile(Icons.email, 'Email', _email),
               _buildInfoTile(Icons.person, 'Username', _usernameController.text),
