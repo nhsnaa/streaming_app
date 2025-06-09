@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
-import 'package:streaming_app/widgets/movie_info_dialog.dart';
+import 'package:streaming_app/widgets/movie_info_dialog.dart'; // ✅ Import the floating info dialog
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -11,8 +11,8 @@ class CategoriesPage extends StatefulWidget {
   State<CategoriesPage> createState() => _CategoriesPageState();
 }
 
-class _CategoriesPageState extends State<CategoriesPage>
-    with SingleTickerProviderStateMixin {
+class _CategoriesPageState extends State<CategoriesPage> {
+  // ✅ Define genres
   final List<Map<String, dynamic>> movieGenres = [
     {'name': 'Action', 'id': 28},
     {'name': 'Adventure', 'id': 12},
@@ -37,24 +37,31 @@ class _CategoriesPageState extends State<CategoriesPage>
 
   List<dynamic> items = [];
   bool isLoading = false;
+  String selectedType = 'Movies';
   String selectedGenre = 'Action';
 
   @override
   void initState() {
     super.initState();
-    _loadContentByGenre(28, true); // Default: Action Movies
+    _loadContentByGenre(28); // Load Action movies by default
   }
 
-  Future<void> _loadContentByGenre(int genreId, bool isMovie) async {
+  // ✅ Load content from TMDB by genre
+  Future<void> _loadContentByGenre(int genreId) async {
     setState(() => isLoading = true);
 
     try {
-      final fetched = isMovie
-          ? await TMDBService().fetchMoviesByGenre(genreId)
-          : await TMDBService().fetchTVByGenre(genreId);
-      setState(() {
-        items = fetched.where((m) => m['poster_path'] != null).toList();
-      });
+      if (selectedType == 'Movies') {
+        final fetched = await TMDBService().fetchMoviesByGenre(genreId);
+        setState(() {
+          items = fetched.where((m) => m['poster_path'] != null).toList();
+        });
+      } else {
+        final fetched = await TMDBService().fetchTVByGenre(genreId);
+        setState(() {
+          items = fetched.where((m) => m['poster_path'] != null).toList();
+        });
+      }
     } catch (e) {
       print('Error loading content: $e');
     }
@@ -64,47 +71,7 @@ class _CategoriesPageState extends State<CategoriesPage>
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      initialIndex: 0, // Start with Movies
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: const Text('Categories'),
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          bottom: TabBar(
-            indicatorColor: Colors.blue,
-            onTap: (index) {
-              final isMovie = index == 0;
-              final firstGenre =
-                  isMovie ? movieGenres[0] : tvGenres[0];
-
-              setState(() {
-                selectedGenre = firstGenre['name'];
-              });
-              _loadContentByGenre(firstGenre['id'], isMovie);
-            },
-            tabs: const [
-              Tab(text: 'Movies'),
-              Tab(text: 'TV Shows'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          physics: const NeverScrollableScrollPhysics(), // Optional: Lock swiping
-          children: [
-            _buildContent(isMovie: true),
-            _buildContent(isMovie: false),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent({required bool isMovie}) {
-    final genres = isMovie ? movieGenres : tvGenres;
+    final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
 
     return isLoading
         ? const Center(child: CircularProgressIndicator())
@@ -113,7 +80,44 @@ class _CategoriesPageState extends State<CategoriesPage>
               children: [
                 const SizedBox(height: 12),
 
-                // Genre selector
+                // ✅ Toggle Movies / TV Shows
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: ['Movies', 'TV Shows'].map((type) {
+                    final isSelected = selectedType == type;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedType = type;
+                            selectedGenre = (type == 'Movies'
+                                    ? movieGenres
+                                    : tvGenres)[0]['name'];
+                            _loadContentByGenre((type == 'Movies'
+                                    ? movieGenres
+                                    : tvGenres)[0]['id']);
+                          });
+                        },
+                        child: Text(
+                          type,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? Colors.blue : Colors.white70,
+                            decoration:
+                                isSelected ? TextDecoration.underline : null,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ✅ Genre selector
                 SizedBox(
                   height: 50,
                   child: ListView.builder(
@@ -127,14 +131,14 @@ class _CategoriesPageState extends State<CategoriesPage>
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isSelected
-                                ? Colors.blueAccent
+                                ? Colors.lightBlue
                                 : Colors.grey.shade300,
                             foregroundColor:
                                 isSelected ? Colors.white : Colors.black,
                           ),
                           onPressed: () {
                             setState(() => selectedGenre = genre['name']);
-                            _loadContentByGenre(genre['id'], isMovie);
+                            _loadContentByGenre(genre['id']);
                           },
                           child: Text(genre['name']),
                         ),
@@ -145,14 +149,14 @@ class _CategoriesPageState extends State<CategoriesPage>
 
                 const SizedBox(height: 20),
 
-                // Grid of cards
+                // ✅ Grid of cards
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Wrap(
                     spacing: 16,
                     runSpacing: 20,
                     children: items.map((item) {
-                      final title = isMovie
+                      final title = selectedType == 'Movies'
                           ? item['title']
                           : item['name'];
 
@@ -162,15 +166,17 @@ class _CategoriesPageState extends State<CategoriesPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             HoverMovieCard(
-                              item: item,
+                              item: item, // ✅ Pass full item here
                               height: 200,
                               width: 140,
                               onTap: () async {
+                                // ✅ Show floating dialog first
                                 final shouldPlay = await showDialog<bool>(
                                   context: context,
                                   builder: (_) => MovieInfoDialog(item: item),
                                 );
 
+                                // ✅ If user pressed play, navigate to DetailPage
                                 if (shouldPlay == true && context.mounted) {
                                   Navigator.push(
                                     context,
@@ -203,3 +209,16 @@ class _CategoriesPageState extends State<CategoriesPage>
           );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

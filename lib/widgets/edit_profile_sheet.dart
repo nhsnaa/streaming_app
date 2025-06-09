@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class EditProfileSheet extends StatefulWidget {
   final String username;
   final String phone;
-  final String location;
+  final String description;
   final Function(Map<String, String>) onSave;
 
   const EditProfileSheet({
     super.key,
     required this.username,
     required this.phone,
-    required this.location,
+    required this.description,
     required this.onSave,
   });
 
@@ -21,14 +21,39 @@ class EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<EditProfileSheet> {
   late TextEditingController _usernameController;
   late TextEditingController _phoneController;
-  late TextEditingController _locationController;
+  late TextEditingController _descriptionController;
 
   @override
   void initState() {
     _usernameController = TextEditingController(text: widget.username);
     _phoneController = TextEditingController(text: widget.phone);
-    _locationController = TextEditingController(text: widget.location);
+    _descriptionController = TextEditingController(text: widget.description);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    if (_usernameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username cannot be empty')),
+      );
+      return;
+    }
+
+    widget.onSave({
+      'username': _usernameController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'description': _descriptionController.text.trim(),
+    });
+
+    Navigator.pop(context);
   }
 
   @override
@@ -44,24 +69,29 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Edit Profile',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text(
+              'Edit Profile',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
-            _buildField('Username', _usernameController),
-            _buildField('Phone', _phoneController),
-            _buildField('Location', _locationController),
+            _buildField('Username', _usernameController, keyboardType: TextInputType.text, autofocus: true),
+            _buildField('Phone', _phoneController, keyboardType: TextInputType.phone),
+            _buildField('Description', _descriptionController, maxLines: 3),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                widget.onSave({
-                  'username': _usernameController.text,
-                  'phone': _phoneController.text,
-                  'location': _locationController.text,
-                });
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-              child: const Text('Save'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: _handleSave,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                  child: const Text('Save'),
+                ),
+              ],
             ),
           ],
         ),
@@ -69,11 +99,20 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller) {
+  Widget _buildField(
+    String label,
+    TextEditingController controller, {
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+    bool autofocus = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: TextField(
         controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        autofocus: autofocus,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           labelText: label,
@@ -93,3 +132,4 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     );
   }
 }
+

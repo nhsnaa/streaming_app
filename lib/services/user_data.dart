@@ -1,72 +1,132 @@
-class UserData {
-  // Simulated user "database" as a list of maps
-  static final List<Map<String, String>> _users = [];
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-  // Currently logged in user's email (null if none logged in)
-  static String? _currentUserEmail;
+class UserData {
+  static List<Map<String, String>> _registeredUsers = [];
+  static String? _loggedInUser;
+
+  // Public getter for registered users (read-only)
+  static List<Map<String, String>> get registeredUsers => _registeredUsers;
+
+  // Load registered users from SharedPreferences
+  static Future<void> loadUsersFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userListJson = prefs.getStringList('users') ?? [];
+    _registeredUsers = userListJson
+        .map((u) => Map<String, String>.from(jsonDecode(u)))
+        .toList();
+    print("Loaded users: $_registeredUsers");
+  }
+
+  // Save registered users to SharedPreferences
+  static Future<void> saveUsersToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userListJson = _registeredUsers.map((u) => jsonEncode(u)).toList();
+    await prefs.setStringList('users', userListJson);
+    print('✅ Saved users: $userListJson'); 
+  }
+
+  // Load logged-in user from SharedPreferences
+  static Future<void> loadUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    _loggedInUser = prefs.getString('loggedInUser');
+    print("Logged in user: $_loggedInUser");
+  }
+
+  // Save logged-in user to SharedPreferences
+  static Future<void> saveUserToPrefs(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    _loggedInUser = email;
+    await prefs.setString('loggedInUser', email);
+    print('✅ Saved loggedInUser: $_loggedInUser'); 
+  }
 
   // Register a new user
-  static String register(String email, String password, String confirmPassword) {
-    // Check if email already registered
-    if (_users.any((user) => user['email'] == email)) {
-      return 'Email is already registered.';
+  static Future<String> register(
+      String email, String password, String confirmPassword) async {
+    // Load latest data from SharedPreferences
+    await loadUsersFromPrefs();
+
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      return 'All fields are required.';
     }
 
-    // Check password confirmation
     if (password != confirmPassword) {
       return 'Passwords do not match.';
     }
 
-    // Add new user with some default profile data
-    _users.add({
-      'email': email,
-      'password': password,
-      'username': '',
-      'phone': '',
-      'location': '',
-    });
+    final exists = _registeredUsers.any((user) => user['email'] == email);
+    if (exists) {
+      return 'Email already registered.';
+    }
+
+    _registeredUsers.add({'email': email, 'password': password});
+    await saveUsersToPrefs();
     return 'Registration successful.';
   }
 
-  // Login function, returns true if success and sets current user email
-  static bool login(String email, String password) {
-    final user = _users.firstWhere(
-      (user) => user['email'] == email && user['password'] == password,
-      orElse: () => {},
-    );
+  // Log in a user
+  static Future<bool> login(String email, String password) async {
+    // Load latest data from SharedPreferences
+    await loadUsersFromPrefs();
 
-    if (user.isNotEmpty) {
-      _currentUserEmail = email; // set current user
+    final exists = _registeredUsers.any(
+        (user) => user['email'] == email && user['password'] == password);
+
+    if (exists) {
+      await saveUserToPrefs(email);
       return true;
     }
+
     return false;
   }
 
-  // Get current logged-in user's info map or null if no user logged in
-  static Map<String, String>? getCurrentUser() {
-    if (_currentUserEmail == null) return null;
+  // Get the current logged-in user
+  static String? get loggedInUser => _loggedInUser;
 
-    return _users.firstWhere(
-      (user) => user['email'] == _currentUserEmail,
+  // Log out
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('loggedInUser');
+    _loggedInUser = null;
+  }
+
+  // Get the currently logged-in user's full data
+  static Map<String, String>? getCurrentUser() {
+    if (_loggedInUser == null) return null;
+    return _registeredUsers.firstWhere(
+      (user) => user['email'] == _loggedInUser,
       orElse: () => {},
     );
   }
 
-  // Update current user's profile info with provided newData (e.g. username, phone, location)
-  static void updateCurrentUser(Map<String, String> newData) {
-    if (_currentUserEmail == null) return;
+  // Update the current logged-in user's data
+  static Future<void> updateCurrentUser(Map<String, String> updatedUser) async {
+    if (_loggedInUser == null) return;
 
-    final index = _users.indexWhere((user) => user['email'] == _currentUserEmail);
+    // Find index of the current user
+    final index = _registeredUsers.indexWhere((u) => u['email'] == _loggedInUser);
     if (index != -1) {
-      _users[index].addAll(newData);
+      _registeredUsers[index] = updatedUser;
+      await saveUsersToPrefs();
     }
   }
 
-  // Logout current user
-  static void logout() {
-    _currentUserEmail = null;
+  // Delete the current logged-in user
+  static Future<void> deleteCurrentUser() async {
+    if (_loggedInUser == null) return;
+
+    _registeredUsers.removeWhere((u) => u['email'] == _loggedInUser);
+    await saveUsersToPrefs();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('loggedInUser');
+    _loggedInUser = null;
   }
 }
+
+
+
 
 
 

@@ -102,12 +102,26 @@ class LoginPage extends StatelessWidget {
 
                       // Login button
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final email = emailController.text.trim();
                           final password = passwordController.text.trim();
-                          final success = UserData.login(email, password);
+
+                          if (email.isEmpty || password.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enter email and password"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          final success = await UserData.login(email, password);
 
                           if (success) {
+                            // Optional: clear fields on success
+                            emailController.clear();
+                            passwordController.clear();
+
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(builder: (context) => const HomePage()),
@@ -123,12 +137,14 @@ class LoginPage extends StatelessWidget {
                             );
                           }
                         },
-                        style: ElevatedButton.styleFrom(
+
+                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(255, 32, 115, 239),
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 80),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 80),
+                          
                         ),
                         child: Text(
                           "Sign In",

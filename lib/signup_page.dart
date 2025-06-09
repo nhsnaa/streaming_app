@@ -120,22 +120,34 @@ class SignupPage extends StatelessWidget {
 
                       // Sign Up Button
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final email = emailController.text.trim();
                           final password = passwordController.text.trim();
                           final confirm = confirmPasswordController.text.trim();
 
-                          final result = UserData.register(email, password, confirm);
+                          if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please fill all fields')),
+                            );
+                            return;
+                          }
+
+                          final result = await UserData.register(email, password, confirm);
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(result)),
                           );
 
                           if (result == 'Registration successful.') {
+                            // Optional: Clear the fields on success
+                            emailController.clear();
+                            passwordController.clear();
+                            confirmPasswordController.clear();
+
                             Navigator.pushReplacementNamed(context, '/login');
                           }
                         },
-
+                        
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(255, 32, 115, 239),
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 80),

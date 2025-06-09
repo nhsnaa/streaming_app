@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/widgets/edit_profile_sheet.dart';
+import 'package:streaming_app/modules/setting_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,8 +13,10 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _usernameController;
   late TextEditingController _phoneController;
-  late TextEditingController _locationController;
+  late TextEditingController _descriptionController;
+
   String _email = '';
+  String _selectedAvatar = 'assets/images/avatars/profile.jpg';
 
   @override
   void initState() {
@@ -27,12 +30,13 @@ class _ProfilePageState extends State<ProfilePage> {
       _email = user['email'] ?? '';
       _usernameController = TextEditingController(text: user['username'] ?? '');
       _phoneController = TextEditingController(text: user['phone'] ?? '');
-      _locationController = TextEditingController(text: user['location'] ?? '');
+      _descriptionController = TextEditingController(text: user['description'] ?? '');
+      _selectedAvatar = user['avatar'] ?? _selectedAvatar;
     } else {
       _email = '';
       _usernameController = TextEditingController();
       _phoneController = TextEditingController();
-      _locationController = TextEditingController();
+      _descriptionController = TextEditingController();
     }
   }
 
@@ -40,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() {
     _usernameController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -55,15 +59,100 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => EditProfileSheet(
         username: _usernameController.text,
         phone: _phoneController.text,
-        location: _locationController.text,
+        description: _descriptionController.text,
         onSave: (updatedData) {
           setState(() {
             _usernameController.text = updatedData['username']!;
             _phoneController.text = updatedData['phone']!;
-            _locationController.text = updatedData['location']!;
-            UserData.updateCurrentUser(updatedData);
+            _descriptionController.text = updatedData['description']!;
+            final current = UserData.getCurrentUser() ?? {};
+            UserData.updateCurrentUser({
+              ...current,
+              ...updatedData,
+              'avatar': _selectedAvatar,
+            });
           });
         },
+      ),
+    );
+  }
+
+  void _showAvatarPicker() {
+    final avatars = [
+      'assets/images/avatars/avatars1.png',
+      'assets/images/avatars/avatars2.png',
+      'assets/images/avatars/avatars3.png',
+      'assets/images/avatars/avatars4.png',
+      'assets/images/avatars/avatars5.png',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Choose Your Avatar',
+                style: TextStyle(fontSize: 18, color: Colors.white)),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              itemCount: avatars.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedAvatar = avatars[index];
+                      final current = UserData.getCurrentUser() ?? {};
+                      UserData.updateCurrentUser({
+                        ...current,
+                        'username': _usernameController.text,
+                        'phone': _phoneController.text,
+                        'description': _descriptionController.text,
+                        'email': _email,
+                        'avatar': _selectedAvatar,
+                      });
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage(avatars[index]),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _selectedAvatar = 'assets/images/avatars/profile.jpg';
+                  UserData.updateCurrentUser({
+                    'username': _usernameController.text,
+                    'phone': _phoneController.text,
+                    'description': _descriptionController.text,
+                    'email': _email,
+                    'avatar': _selectedAvatar,
+                  });
+                });
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.restore, color: Colors.white),
+              label: const Text('Use Default Picture',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -71,67 +160,62 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.black,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Add settings functionality here
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Settings clicked")),
-              );
-            },
-          ),
-        ],
+        foregroundColor: Colors.white,
+        title: const Text('Profile'),
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          },
+        ),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Profile header
-              Row(
+              Stack(
+                alignment: Alignment.bottomRight,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage('assets/images/login_signup/profile.jpg'),
+                    backgroundImage: AssetImage(_selectedAvatar),
                   ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    onPressed: _openEditProfile,
+                  Positioned(
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      onPressed: _showAvatarPicker,
+                      iconSize: 20,
+                      padding: const EdgeInsets.all(4),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black87,
+                        shape: const CircleBorder(
+                          side: BorderSide(color: Colors.white24),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
-
               _buildInfoRow('Email', _email),
               _buildInfoRow('Username', _usernameController.text),
               _buildInfoRow('Phone', _phoneController.text),
-              _buildInfoRow('Location', _locationController.text),
-
-              const Spacer(),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                  onPressed: () {
-                    UserData.logout();
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
+              _buildInfoRow('Description', _descriptionController.text),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openEditProfile,
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.edit),
       ),
     );
   }
@@ -150,8 +234,4 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
-
-
-
 

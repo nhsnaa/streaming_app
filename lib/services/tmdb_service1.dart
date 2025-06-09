@@ -135,6 +135,30 @@ class TMDBService {
   }
 }
 
+//movie genre
+Future<List<Map<String, dynamic>>> fetchMovieGenres() async {
+  final url = '$_baseUrl/genre/movie/list?api_key=$tmdbApiKey';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return List<Map<String, dynamic>>.from(data['genres']);
+  } else {
+    throw Exception('Failed to fetch movie genres');
+  }
+}
+
+//tv genre
+Future<List<Map<String, dynamic>>> fetchTVGenres() async {
+  final url = '$_baseUrl/genre/tv/list?api_key=$tmdbApiKey';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return List<Map<String, dynamic>>.from(data['genres']);
+  } else {
+    throw Exception('Failed to fetch TV genres');
+  }
+}
+
 
 
   // *** IMPORTANT ***  
