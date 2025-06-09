@@ -82,7 +82,7 @@ class MovieInfoDialog extends StatelessWidget {
 
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: Colors.lightBlueAccent,
                   ),
                   onPressed: () {
                     Navigator.pop(context); // Close dialog
@@ -93,8 +93,10 @@ class MovieInfoDialog extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text("Play Trailer"),
+                  icon: const Icon(Icons.play_arrow, color: Colors.black),
+                  label: const Text(
+                    "Play Trailer",
+                    style: const TextStyle(color: Colors.black)),
                 ),
               ],
             ),
