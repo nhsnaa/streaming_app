@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
+import 'package:streaming_app/widgets/movie_info_dialog.dart'; 
+
 
 class SearchResults extends StatefulWidget {
   final String query;
@@ -103,24 +105,42 @@ class _SearchResultsState extends State<SearchResults> {
                       ? item['release_date'] ?? 'No date'
                       : item['first_air_date'] ?? 'No date';
 
-                  return ListTile(
+                 return ListTile(
                     leading: item['poster_path'] != null
                         ? Image.network(
                             'https://image.tmdb.org/t/p/w92${item['poster_path']}',
                             fit: BoxFit.cover,
                           )
                         : const SizedBox.shrink(),
-                    title: Text(title),
-                    subtitle: Text(date),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailPage(
-                            item: item,
-                          ),
-                        ),
+
+                    // 👇 Customize title text
+                    title: Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,        // Change this color
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    // 👇 Customize subtitle text
+                    subtitle: Text(
+                      date,
+                      style: const TextStyle(
+                        color: Colors.grey,         // Change this color too
+                      ),
+                    ),
+
+                    onTap: () async {
+                      final shouldPlay = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => MovieInfoDialog(item: item),
                       );
+                      if (shouldPlay == true && context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => DetailPage(item: item)),
+                        );
+                      }
                     },
                   );
                 },
