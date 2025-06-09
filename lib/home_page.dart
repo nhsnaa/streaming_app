@@ -74,7 +74,6 @@ class _HomePageState extends State<HomePage> {
         return const FavouritesPage();
       case 3:
         return const ProfilePage();
-    
       default:
         return const Center(child: Text('Page not found'));
     }
@@ -83,7 +82,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ AppBar only for index 0 (Home)
       appBar: _selectedIndex == 0
           ? AppBar(
               backgroundColor: Colors.black,
@@ -109,28 +107,47 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(width: 20),
+                        
+                        /// ✅ Toggle Buttons for 'Movies' and 'TV Shows'
                         Row(
-                          children: ['Movies', 'TV Shows'].map((type) {
-                            final isSelected = selectedContentType == type;
-                            return GestureDetector(
-                              onTap: () {
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'REELORA',
+                              style: GoogleFonts.bebasNeue(
+                                color: const Color.fromARGB(255, 32, 115, 239),
+                                fontSize: 36,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+
+                            /// ✅ ToggleButtons just like in Categories UI
+                            ToggleButtons(
+                              isSelected: ['Movies', 'TV Shows']
+                                  .map((type) => selectedContentType == type)
+                                  .toList(),
+                              onPressed: (index) {
+                                final type = ['Movies', 'TV Shows'][index];
                                 setState(() {
                                   selectedContentType = type;
+                                  searchQuery = '';
+                                  isSearching = false;
                                 });
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                child: Text(
-                                  type,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: isSelected ? Colors.white : Colors.white60,
-                                    decoration: isSelected ? TextDecoration.underline : null,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                              borderColor: Colors.white24,
+                              selectedBorderColor: Colors.lightBlue,
+                              fillColor: Colors.lightBlue.withOpacity(0.2),
+                              selectedColor: Colors.lightBlue,
+                              color: Colors.white70,
+                              borderRadius: BorderRadius.circular(8),
+                              constraints: const BoxConstraints(minHeight: 32, minWidth: 80),
+                              children: const [
+                                Text('Movies'),
+                                Text('TV Shows'),
+                              ],
+                            ),
+                          ],
                         )
                       ],
                     ),
@@ -146,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             )
-          : null, // ❌ No AppBar for other pages
+          : null,
 
       body: _getBodyWidget(_selectedIndex),
 
@@ -167,8 +184,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-
-
-
-
