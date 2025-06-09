@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                     ),
               actions: [
                 IconButton(
-                  icon: Icon(isSearching ? Icons.close : Icons.search),
+                  icon: Icon(isSearching ? Icons.close : Icons.search, color: Colors.white),
                   onPressed: () {
                     setState(() {
                       isSearching = !isSearching;

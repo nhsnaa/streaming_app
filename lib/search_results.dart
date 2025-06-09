@@ -113,20 +113,20 @@ class _SearchResultsState extends State<SearchResults> {
                           )
                         : const SizedBox.shrink(),
 
-                    // 👇 Customize title text
+                    // Customize title text
                     title: Text(
                       title,
                       style: const TextStyle(
-                        color: Colors.white,        // Change this color
+                        color: Colors.white,       
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    // 👇 Customize subtitle text
+                    // Customize subtitle text
                     subtitle: Text(
                       date,
                       style: const TextStyle(
-                        color: Colors.grey,         // Change this color too
+                        color: Colors.grey,  
                       ),
                     ),
 
