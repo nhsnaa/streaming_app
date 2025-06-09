@@ -17,35 +17,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String _email = '';
   String _selectedAvatar = 'assets/images/avatars/profile.jpg';
+  String _selectedBackground = 'assets/images/backgrounds/default.jpg';
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  void _loadUserData() {
     final user = UserData.getCurrentUser();
-    if (user != null) {
-      _email = user['email'] ?? '';
-      _usernameController = TextEditingController(text: user['username'] ?? '');
-      _phoneController = TextEditingController(text: user['phone'] ?? '');
-      _descriptionController = TextEditingController(text: user['description'] ?? '');
-      _selectedAvatar = user['avatar'] ?? _selectedAvatar;
-    } else {
-      _email = '';
-      _usernameController = TextEditingController();
-      _phoneController = TextEditingController();
-      _descriptionController = TextEditingController();
-    }
+    _email = user?['email'] ?? '';
+    _usernameController = TextEditingController(text: user?['username'] ?? '');
+    _phoneController = TextEditingController(text: user?['phone'] ?? '');
+    _descriptionController = TextEditingController(text: user?['description'] ?? '');
+    _selectedAvatar = user?['avatar'] ?? _selectedAvatar;
+    _selectedBackground = user?['background'] ?? _selectedBackground;
   }
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _phoneController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
+  void _updateUserData() {
+    final current = UserData.getCurrentUser() ?? {};
+    UserData.updateCurrentUser({
+      ...current,
+      'avatar': _selectedAvatar,
+      'background': _selectedBackground,
+      'username': _usernameController.text,
+      'phone': _phoneController.text,
+      'description': _descriptionController.text,
+      'email': _email,
+    });
   }
 
   void _openEditProfile() {
@@ -65,46 +61,90 @@ class _ProfilePageState extends State<ProfilePage> {
             _usernameController.text = updatedData['username']!;
             _phoneController.text = updatedData['phone']!;
             _descriptionController.text = updatedData['description']!;
-            final current = UserData.getCurrentUser() ?? {};
-            UserData.updateCurrentUser({
-              ...current,
-              ...updatedData,
-              'avatar': _selectedAvatar,
-            });
+            _updateUserData();
           });
         },
       ),
     );
   }
 
-  void _showAvatarPicker() {
-    final avatars = [
-      'assets/images/avatars/avatars1.png',
-      'assets/images/avatars/avatars2.png',
-      'assets/images/avatars/avatars3.png',
-      'assets/images/avatars/avatars4.png',
-      'assets/images/avatars/avatars5.png',
-    ];
-
+  void _showEditOptions() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.grey[900],
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Wrap(
+          children: [
+            _buildOptionTile(Icons.person, 'Change Avatar', () {
+              Navigator.pop(context);
+              _showImagePicker(
+                type: 'avatar',
+                images: [
+                  'assets/images/avatars/avatars1.png',
+                  'assets/images/avatars/avatars2.png',
+                  'assets/images/avatars/avatars3.png',
+                  'assets/images/avatars/avatars4.png',
+                  'assets/images/avatars/avatars5.png',
+                ],
+                defaultImage: 'assets/images/avatars/profile.jpg',
+              );
+            }),
+            _buildOptionTile(Icons.image, 'Change Background', () {
+              Navigator.pop(context);
+              _showImagePicker(
+                type: 'background',
+                images: [
+                  'assets/images/backgrounds/profile_bg.jpg',
+                  'assets/images/backgrounds/bg2.jpg',
+                  'assets/images/backgrounds/bg3.jpg',
+                  'assets/images/backgrounds/bg4.jpg',
+                  'assets/images/backgrounds/bg5.jpg',
+                ],
+                defaultImage: 'assets/images/backgrounds/default.jpg',
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: onTap,
+    );
+  }
+
+  void _showImagePicker({
+    required String type,
+    required List<String> images,
+    required String defaultImage,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Choose Your Avatar',
-                style: TextStyle(fontSize: 18, color: Colors.white)),
+            Text('Choose Your ${type == 'avatar' ? 'Avatar' : 'Background'}',
+                style: const TextStyle(fontSize: 18, color: Colors.white)),
             const SizedBox(height: 10),
             GridView.builder(
               shrinkWrap: true,
-              itemCount: avatars.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
+              itemCount: images.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: type == 'avatar' ? 5 : 3,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
               ),
@@ -112,23 +152,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedAvatar = avatars[index];
-                      final current = UserData.getCurrentUser() ?? {};
-                      UserData.updateCurrentUser({
-                        ...current,
-                        'username': _usernameController.text,
-                        'phone': _phoneController.text,
-                        'description': _descriptionController.text,
-                        'email': _email,
-                        'avatar': _selectedAvatar,
-                      });
+                      if (type == 'avatar') {
+                        _selectedAvatar = images[index];
+                      } else {
+                        _selectedBackground = images[index];
+                      }
+                      _updateUserData();
                     });
                     Navigator.pop(context);
                   },
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage(avatars[index]),
-                  ),
+                  child: type == 'avatar'
+                      ? CircleAvatar(
+                          backgroundImage: AssetImage(images[index]),
+                          backgroundColor: Colors.transparent,
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(images[index], fit: BoxFit.cover, height: 80),
+                        ),
                 );
               },
             ),
@@ -136,20 +177,18 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton.icon(
               onPressed: () {
                 setState(() {
-                  _selectedAvatar = 'assets/images/avatars/profile.jpg';
-                  UserData.updateCurrentUser({
-                    'username': _usernameController.text,
-                    'phone': _phoneController.text,
-                    'description': _descriptionController.text,
-                    'email': _email,
-                    'avatar': _selectedAvatar,
-                  });
+                  if (type == 'avatar') {
+                    _selectedAvatar = defaultImage;
+                  } else {
+                    _selectedBackground = defaultImage;
+                  }
+                  _updateUserData();
                 });
                 Navigator.pop(context);
               },
               icon: const Icon(Icons.restore, color: Colors.white),
-              label: const Text('Use Default Picture',
-                  style: TextStyle(color: Colors.white)),
+              label: Text('Use Default ${type == 'avatar' ? 'Avatar' : 'Background'}',
+                  style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -157,9 +196,22 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildInfoTile(IconData icon, String label, String value) {
+    return Card(
+      color: Colors.grey[850],
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.blueAccent),
+        title: Text(label, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+        subtitle: Text(value, style: const TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -170,66 +222,81 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const SettingsPage()),
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
             );
           },
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
             children: [
               Stack(
-                alignment: Alignment.bottomRight,
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage(_selectedAvatar),
+                  Container(
+                    height: 220,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(_selectedBackground),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                   ),
                   Positioned(
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white),
-                      onPressed: _showAvatarPicker,
-                      iconSize: 20,
-                      padding: const EdgeInsets.all(4),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black87,
-                        shape: const CircleBorder(
-                          side: BorderSide(color: Colors.white24),
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Colors.blueAccent, Colors.purpleAccent],
                         ),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: CircleAvatar(
+                        radius: 55,
+                        backgroundImage: AssetImage(_selectedAvatar),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    right: 140,
+                    child: Material(
+                      color: Colors.black87,
+                      shape: const CircleBorder(side: BorderSide(color: Colors.white24)),
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        onPressed: _showEditOptions,
+                        iconSize: 26,
+                        padding: const EdgeInsets.all(6),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              _buildInfoRow('Email', _email),
-              _buildInfoRow('Username', _usernameController.text),
-              _buildInfoRow('Phone', _phoneController.text),
-              _buildInfoRow('Description', _descriptionController.text),
+              const SizedBox(height: 32),
+              _buildInfoTile(Icons.email, 'Email', _email),
+              _buildInfoTile(Icons.person, 'Username', _usernameController.text),
+              _buildInfoTile(Icons.phone, 'Phone', _phoneController.text),
+              _buildInfoTile(Icons.info, 'Description', _descriptionController.text),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _openEditProfile,
+        label: const Text('Edit Profile'),
+        icon: const Icon(Icons.edit),
         backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.edit),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("$label: ",
-              style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value, style: const TextStyle(color: Colors.white))),
-        ],
       ),
     );
   }
