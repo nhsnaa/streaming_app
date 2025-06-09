@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
-import 'package:streaming_app/widgets/movie_info_dialog.dart'; // ✅ Import the floating info dialog
+import 'package:streaming_app/widgets/movie_info_dialog.dart';
+import 'package:streaming_app/search_results.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -14,13 +16,14 @@ class CategoriesPage extends StatefulWidget {
 class _CategoriesPageState extends State<CategoriesPage> {
   List<Map<String, dynamic>> movieGenres = [];
   List<Map<String, dynamic>> tvGenres = [];
-
   List<dynamic> items = [];
   bool isLoading = false;
+  bool isSearching = false;
 
   String selectedType = 'Movies';
   String selectedGenre = '';
   int selectedGenreId = 0;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -58,17 +61,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
     setState(() => isLoading = true);
 
     try {
-      if (selectedType == 'Movies') {
-        final fetched = await TMDBService().fetchMoviesByGenre(genreId);
-        setState(() {
-          items = fetched.where((m) => m['poster_path'] != null).toList();
-        });
-      } else {
-        final fetched = await TMDBService().fetchTVByGenre(genreId);
-        setState(() {
-          items = fetched.where((m) => m['poster_path'] != null).toList();
-        });
-      }
+      final fetched = selectedType == 'Movies'
+          ? await TMDBService().fetchMoviesByGenre(genreId)
+          : await TMDBService().fetchTVByGenre(genreId);
+
+      setState(() {
+        items = fetched.where((m) => m['poster_path'] != null).toList();
+      });
     } catch (e) {
       print('Error loading content: $e');
     }
@@ -80,149 +79,179 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget build(BuildContext context) {
     final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
 
-    return isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: isSearching
+            ? TextField(
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Title...',
+                  hintStyle: TextStyle(color: Colors.white60),
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) => setState(() => searchQuery = value),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Categories',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  ToggleButtons(
+                    isSelected: ['Movies', 'TV Shows']
+                        .map((type) => selectedType == type)
+                        .toList(),
+                    onPressed: (index) {
+                      final type = ['Movies', 'TV Shows'][index];
+                      setState(() {
+                        selectedType = type;
+                        searchQuery = '';
+                        isSearching = false;
+                      });
+                      _loadGenresAndContent();
+                    },
+                    borderColor: Colors.white24,
+                    selectedBorderColor: Colors.lightBlue,
+                    fillColor: Colors.lightBlue.withOpacity(0.2),
+                    selectedColor: Colors.lightBlue,
+                    color: Colors.white70,
+                    borderRadius: BorderRadius.circular(8),
+                    constraints: const BoxConstraints(minHeight: 32, minWidth: 80),
+                    children: const [Text('Movies'), Text('TV Shows')],
+                  ),
+                ],
+              ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isSearching ? Icons.close : Icons.search,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                isSearching = !isSearching;
+                if (!isSearching) searchQuery = '';
+              });
+            },
+          ),
+        ],
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : searchQuery.isNotEmpty
+              ? SearchResults(query: searchQuery)
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
 
-                // Toggle Movies / TV Shows
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: ['Movies', 'TV Shows'].map((type) {
-                    final isSelected = selectedType == type;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedType = type;
-                          });
-                          _loadGenresAndContent();
-                        },
-                        child: Text(
-                          type,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? Colors.blue : Colors.white70,
-                            decoration:
-                                isSelected ? TextDecoration.underline : null,
-                          ),
+                      // Premium-style genre chips
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: genres.map((genre) {
+                            final isSelected = selectedGenre == genre['name'];
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedGenre = genre['name'];
+                                  selectedGenreId = genre['id'];
+                                });
+                                _loadContentByGenre(selectedGenreId);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  color: isSelected ? Colors.blueAccent : Colors.grey[850],
+                                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.blueAccent.withOpacity(0.4),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Text(
+                                  genre['name'],
+                                  style: GoogleFonts.poppins(
+                                    color: isSelected ? Colors.white : Colors.white70,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
 
-                const SizedBox(height: 12),
+                      const SizedBox(height: 20),
 
-                // Genre selector
-                SizedBox(
-                  height: 50,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: genres.length,
-                    itemBuilder: (context, index) {
-                      final genre = genres[index];
-                      final isSelected = selectedGenre == genre['name'];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isSelected
-                                ? Colors.lightBlue
-                                : Colors.grey.shade300,
-                            foregroundColor:
-                                isSelected ? Colors.white : Colors.black,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              selectedGenre = genre['name'];
-                              selectedGenreId = genre['id'];
-                            });
-                            _loadContentByGenre(selectedGenreId);
-                          },
-                          child: Text(genre['name']),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                      // Grid of content cards
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 20,
+                          children: items.map((item) {
+                            final title = selectedType == 'Movies' ? item['title'] : item['name'];
 
-                const SizedBox(height: 20),
-
-                // Grid of cards
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Wrap(
-                    spacing: 16,
-                    runSpacing: 20,
-                    children: items.map((item) {
-                      final title = selectedType == 'Movies'
-                          ? item['title']
-                          : item['name'];
-
-                      return SizedBox(
-                        width: 140,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            HoverMovieCard(
-                              item: item,
-                              height: 200,
+                            return SizedBox(
                               width: 140,
-                              onTap: () async {
-                                final shouldPlay = await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => MovieInfoDialog(item: item),
-                                );
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  HoverMovieCard(
+                                    item: item,
+                                    height: 200,
+                                    width: 140,
+                                    onTap: () async {
+                                      final shouldPlay = await showDialog<bool>(
+                                        context: context,
+                                        builder: (_) => MovieInfoDialog(item: item),
+                                      );
 
-                                if (shouldPlay == true && context.mounted) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => DetailPage(item: item),
+                                      if (shouldPlay == true && context.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => DetailPage(item: item),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    title ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
                                     ),
-                                  );
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              title ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            );
+                          }).toList(),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
+    );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

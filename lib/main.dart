@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/home_page.dart';
 import 'package:streaming_app/services/user_data.dart';
-import 'package:streaming_app/modules/profile_page.dart';
 import 'intro_page.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
@@ -21,13 +20,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/profile',  
+      initialRoute: '/intro',  
       routes: {
         '/intro': (context) => IntroPage(),
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignupPage(),
         '/home': (context) => HomePage(),
-        '/profile': (context) => ProfilePage(),
       },
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
