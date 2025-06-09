@@ -107,49 +107,33 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        
-                        /// ✅ Toggle Buttons for 'Movies' and 'TV Shows'
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'REELORA',
-                              style: GoogleFonts.bebasNeue(
-                                color: const Color.fromARGB(255, 32, 115, 239),
-                                fontSize: 36,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-
+                        ToggleButtons(
+                          isSelected: ['Movies', 'TV Shows']
+                          .map((type) => selectedContentType == type)
+                          .toList(),
+                          onPressed: (index) {
+                           final type = ['Movies', 'TV Shows'][index];
+                           setState(() {
+                            selectedContentType = type;
+                            searchQuery = '';
+                            isSearching = false;
+                            });
+                          },
+                          borderColor: Colors.white24,
+                          selectedBorderColor: Colors.lightBlue,
+                          fillColor: Colors.lightBlue.withOpacity(0.2),
+                          selectedColor: Colors.lightBlue,
+                          color: Colors.white70,
+                          borderRadius: BorderRadius.circular(8),
+                          constraints: const BoxConstraints(minHeight: 32, minWidth: 80),
+                          children: const [
+                            Text('Movies'),
+                            Text('TV Shows'),
+                            ],
+                          ),
+                       ],
                             /// ✅ ToggleButtons just like in Categories UI
-                            ToggleButtons(
-                              isSelected: ['Movies', 'TV Shows']
-                                  .map((type) => selectedContentType == type)
-                                  .toList(),
-                              onPressed: (index) {
-                                final type = ['Movies', 'TV Shows'][index];
-                                setState(() {
-                                  selectedContentType = type;
-                                  searchQuery = '';
-                                  isSearching = false;
-                                });
-                              },
-                              borderColor: Colors.white24,
-                              selectedBorderColor: Colors.lightBlue,
-                              fillColor: Colors.lightBlue.withOpacity(0.2),
-                              selectedColor: Colors.lightBlue,
-                              color: Colors.white70,
-                              borderRadius: BorderRadius.circular(8),
-                              constraints: const BoxConstraints(minHeight: 32, minWidth: 80),
-                              children: const [
-                                Text('Movies'),
-                                Text('TV Shows'),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
+                            
                     ),
               actions: [
                 IconButton(
