@@ -54,7 +54,6 @@ class TMDBService {
   }
 
     //TV list
-
   Future<List<dynamic>> fetchAiringTodayTV() async {
     final response = await http.get(
       Uri.parse('$_baseUrl/tv/airing_today?api_key=$tmdbApiKey'), //popular
@@ -114,6 +113,7 @@ class TMDBService {
   Future<List<dynamic>> fetchMoviesByGenre(int genreId) async {
     final url = '$_baseUrl/discover/movie?api_key=$tmdbApiKey&with_genres=$genreId';
     final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return data['results'] as List<dynamic>;
@@ -122,42 +122,44 @@ class TMDBService {
     }
   }
 
-   // Fetch TV by genre ID
- Future<List<dynamic>> fetchTVByGenre(int genreId) async {
-  final url = '$_baseUrl/discover/tv?api_key=$tmdbApiKey&with_genres=$genreId';
+  // Fetch TV shows by genre ID
+  Future<List<dynamic>> fetchTVByGenre(int genreId) async {
+    final url = '$_baseUrl/discover/tv?api_key=$tmdbApiKey&with_genres=$genreId';
+    final response = await http.get(Uri.parse(url));
 
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['results'] as List<dynamic>;
-  } else {
-    throw Exception('Failed to fetch TV shows by genre');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['results'] as List<dynamic>;
+    } else {
+      throw Exception('Failed to fetch TV shows by genre');
+    }
   }
-}
 
-//movie genre
-Future<List<Map<String, dynamic>>> fetchMovieGenres() async {
-  final url = '$_baseUrl/genre/movie/list?api_key=$tmdbApiKey';
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return List<Map<String, dynamic>>.from(data['genres']);
-  } else {
-    throw Exception('Failed to fetch movie genres');
-  }
-}
+  // Fetch movie genres list
+  Future<List<Map<String, dynamic>>> fetchMovieGenres() async {
+    final url = '$_baseUrl/genre/movie/list?api_key=$tmdbApiKey';
+    final response = await http.get(Uri.parse(url));
 
-//tv genre
-Future<List<Map<String, dynamic>>> fetchTVGenres() async {
-  final url = '$_baseUrl/genre/tv/list?api_key=$tmdbApiKey';
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return List<Map<String, dynamic>>.from(data['genres']);
-  } else {
-    throw Exception('Failed to fetch TV genres');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data['genres']);
+    } else {
+      throw Exception('Failed to fetch movie genres');
+    }
   }
-}
+
+  // Fetch TV genres list
+  Future<List<Map<String, dynamic>>> fetchTVGenres() async {
+    final url = '$_baseUrl/genre/tv/list?api_key=$tmdbApiKey';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data['genres']);
+    } else {
+      throw Exception('Failed to fetch TV genres');
+    }
+  }
 
 
 

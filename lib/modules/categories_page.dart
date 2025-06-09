@@ -12,41 +12,48 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
-  // ✅ Define genres
-  final List<Map<String, dynamic>> movieGenres = [
-    {'name': 'Action', 'id': 28},
-    {'name': 'Adventure', 'id': 12},
-    {'name': 'Animation', 'id': 16},
-    {'name': 'Comedy', 'id': 35},
-    {'name': 'Drama', 'id': 18},
-    {'name': 'Horror', 'id': 27},
-    {'name': 'Romance', 'id': 10749},
-    {'name': 'Thriller', 'id': 53},
-  ];
-
-  final List<Map<String, dynamic>> tvGenres = [
-    {'name': 'Action & Adventure', 'id': 10759},
-    {'name': 'Animation', 'id': 16},
-    {'name': 'Comedy', 'id': 35},
-    {'name': 'Crime', 'id': 80},
-    {'name': 'Documentary', 'id': 99},
-    {'name': 'Drama', 'id': 18},
-    {'name': 'Family', 'id': 10751},
-    {'name': 'Mystery', 'id': 9648},
-  ];
+  List<Map<String, dynamic>> movieGenres = [];
+  List<Map<String, dynamic>> tvGenres = [];
 
   List<dynamic> items = [];
   bool isLoading = false;
+
   String selectedType = 'Movies';
-  String selectedGenre = 'Action';
+  String selectedGenre = '';
+  int selectedGenreId = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadContentByGenre(28); // Load Action movies by default
+    _loadGenresAndContent();
   }
 
-  // ✅ Load content from TMDB by genre
+  Future<void> _loadGenresAndContent() async {
+    setState(() => isLoading = true);
+
+    try {
+      if (selectedType == 'Movies') {
+        movieGenres = await TMDBService().fetchMovieGenres();
+        if (movieGenres.isNotEmpty) {
+          selectedGenre = movieGenres[0]['name'];
+          selectedGenreId = movieGenres[0]['id'];
+          await _loadContentByGenre(selectedGenreId);
+        }
+      } else {
+        tvGenres = await TMDBService().fetchTVGenres();
+        if (tvGenres.isNotEmpty) {
+          selectedGenre = tvGenres[0]['name'];
+          selectedGenreId = tvGenres[0]['id'];
+          await _loadContentByGenre(selectedGenreId);
+        }
+      }
+    } catch (e) {
+      print('Error loading genres or content: $e');
+    }
+
+    setState(() => isLoading = false);
+  }
+
   Future<void> _loadContentByGenre(int genreId) async {
     setState(() => isLoading = true);
 
@@ -80,7 +87,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               children: [
                 const SizedBox(height: 12),
 
-                // ✅ Toggle Movies / TV Shows
+                // Toggle Movies / TV Shows
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: ['Movies', 'TV Shows'].map((type) {
@@ -91,13 +98,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         onTap: () {
                           setState(() {
                             selectedType = type;
-                            selectedGenre = (type == 'Movies'
-                                    ? movieGenres
-                                    : tvGenres)[0]['name'];
-                            _loadContentByGenre((type == 'Movies'
-                                    ? movieGenres
-                                    : tvGenres)[0]['id']);
                           });
+                          _loadGenresAndContent();
                         },
                         child: Text(
                           type,
@@ -117,7 +119,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                 const SizedBox(height: 12),
 
-                // ✅ Genre selector
+                // Genre selector
                 SizedBox(
                   height: 50,
                   child: ListView.builder(
@@ -137,8 +139,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                 isSelected ? Colors.white : Colors.black,
                           ),
                           onPressed: () {
-                            setState(() => selectedGenre = genre['name']);
-                            _loadContentByGenre(genre['id']);
+                            setState(() {
+                              selectedGenre = genre['name'];
+                              selectedGenreId = genre['id'];
+                            });
+                            _loadContentByGenre(selectedGenreId);
                           },
                           child: Text(genre['name']),
                         ),
@@ -149,7 +154,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                 const SizedBox(height: 20),
 
-                // ✅ Grid of cards
+                // Grid of cards
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Wrap(
@@ -166,17 +171,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             HoverMovieCard(
-                              item: item, // ✅ Pass full item here
+                              item: item,
                               height: 200,
                               width: 140,
                               onTap: () async {
-                                // ✅ Show floating dialog first
                                 final shouldPlay = await showDialog<bool>(
                                   context: context,
                                   builder: (_) => MovieInfoDialog(item: item),
                                 );
 
-                                // ✅ If user pressed play, navigate to DetailPage
                                 if (shouldPlay == true && context.mounted) {
                                   Navigator.push(
                                     context,
@@ -209,6 +212,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           );
   }
 }
+
 
 
 
