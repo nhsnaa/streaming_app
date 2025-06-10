@@ -17,6 +17,8 @@ class _SearchResultsState extends State<SearchResults> {
   String contentType = 'Movies'; // Default to Movies
   Future<List<dynamic>>? _futureResults;
 
+
+
   @override
   void initState() {
     super.initState();
