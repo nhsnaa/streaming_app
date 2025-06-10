@@ -241,7 +241,7 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                     top: 5,
                     right: 5,
                     child: IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.black),
+                      icon: const Icon(Icons.settings, color: Colors.white),
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(builder: (_) => const SettingsPage()),

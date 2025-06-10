@@ -89,7 +89,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                 ElevatedButton(
                   onPressed: _handleSave,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-                  child: const Text('Save'),
+                  child: const Text('Save', style:TextStyle(color: Colors.black)),
                 ),
               ],
             ),
