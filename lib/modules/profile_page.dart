@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/modules/setting_page.dart';
+
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/widgets/edit_profile_sheet.dart';
 
@@ -137,7 +138,7 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                 itemCount: images.length,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: type == 'avatar' ? 100 : 220,
-                  mainAxisExtent: type == 'background' ? 100 : type == 'avatar' ? 100 : 280,
+                  mainAxisExtent: type == 'background' ? 100 : type == 'avatar' ? 100 : 280, //size avatar and background
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   childAspectRatio: type == 'avatar' ? 1 : 2.5,
@@ -206,8 +207,8 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: ListTile(
         leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(label, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
-        subtitle: Text(value.isNotEmpty ? value : 'Not set', style: const TextStyle(color: Colors.white)),
+        title: Text(label, style: const TextStyle(color: Colors.white70)),
+        subtitle: Text(value.isNotEmpty ? value : 'Not set', style: const TextStyle(color: Colors.white30)),
       ),
     );
   }
@@ -228,7 +229,7 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                 clipBehavior: Clip.none,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
                       _selectedBackground,
                       width: double.infinity,
@@ -238,10 +239,10 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                   ),
                   // Settings icon (top-right)
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: 5,
+                    right: 5,
                     child: IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.white),
+                      icon: const Icon(Icons.settings, color: Colors.black),
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(builder: (_) => const SettingsPage()),
@@ -266,7 +267,7 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                       ),
                   ),
                   Positioned(
-                    bottom: 0,
+                    bottom: -2,
                     right: 0,
                     child: GestureDetector(
                       onTap: _showEditOptions,
@@ -291,8 +292,8 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _openEditProfile,
-                icon: const Icon(Icons.edit),
-                label: const Text("Edit Profile"),
+                icon: const Icon(Icons.edit, color: Colors.black),
+                label: const Text("Edit Profile", style: TextStyle(color: Colors.black)),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
               ),
               const SizedBox(height: 12),
