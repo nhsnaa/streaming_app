@@ -37,6 +37,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
+  if (index == 3) {
+    // Show popup when Profile is tapped
+    showDialog(
+      context: context,
+      builder: (_) => const ProfilePopupContent(),
+    );
+  } else {
     setState(() {
       _selectedIndex = index;
       if (index != 0) {
@@ -45,6 +52,8 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+}
+
 
   Widget _getBodyWidget(int index) {
     switch (index) {
@@ -73,7 +82,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return const FavouritesPage();
       case 3:
-        return const ProfilePage();
+        return const ProfilePopupContent();
       default:
         return const Center(child: Text('Page not found'));
     }
