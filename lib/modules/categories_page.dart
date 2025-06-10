@@ -171,19 +171,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              color: isSelected ? Colors.blueAccent : Colors.grey[850],
-                              border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.blueAccent.withOpacity(0.4),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ]
-                                  : [],
+                            borderRadius: BorderRadius.circular(24),
+                            gradient: isSelected
+                                ? const LinearGradient(
+                                    colors: [Colors.blueAccent, Colors.purpleAccent],
+                                  )
+                                : null,
+                            color: isSelected ? null : Colors.grey[850],
                             ),
+
                             child: Text(
                               genre['name'],
                               style: GoogleFonts.poppins(
