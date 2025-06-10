@@ -133,11 +133,11 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
             SizedBox(
               height: type == 'avatar' ? 120 : 220,
               child: GridView.builder(
-                scrollDirection: Axis.horizontal,
+                scrollDirection: Axis.vertical,
                 itemCount: images.length,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: type == 'avatar' ? 100 : 220,
-                  mainAxisExtent: type == 'avatar' ? 100 : 280,
+                  mainAxisExtent: type == 'background' ? 100 : type == 'avatar' ? 100 : 280,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   childAspectRatio: type == 'avatar' ? 1 : 2.5,
@@ -158,10 +158,9 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                     child: type == 'avatar'
                         ? CircleAvatar(
                             backgroundImage: AssetImage(images[index]),
-                            backgroundColor: Colors.transparent,
                           )
                         : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20), //boarder round for background
                             child: Image.asset(images[index], fit: BoxFit.cover),
                           ),
                   );
@@ -261,7 +260,7 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                         ),
                         padding: const EdgeInsets.all(3),
                         child: CircleAvatar(
-                          radius: 50,
+                          radius: 50, // size circle
                           backgroundImage: AssetImage(_selectedAvatar),
                         ),
                       ),
@@ -274,10 +273,10 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                       child: Container(
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.transparent,
+                          color: Colors.black38,
                         ),
                         padding: const EdgeInsets.all(4),
-                        child: const Icon(Icons.edit, size: 18, color: Colors.white54),
+                        child: const Icon(Icons.edit, size: 20, color: Colors.white60),
                       ),
                     ),
                   )
