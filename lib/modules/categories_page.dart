@@ -80,7 +80,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
     final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
 
     return Scaffold(
-      
       appBar: AppBar(
         backgroundColor: Colors.black,
         automaticallyImplyLeading: false, // This hides the back button
