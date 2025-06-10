@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       appBar: _selectedIndex == 0
           ? AppBar(
               backgroundColor: Colors.black,
-               automaticallyImplyLeading: false, // This hides the back button
+              automaticallyImplyLeading: false, // This hides the back button
               title: isSearching
                   ? TextField(
                       autofocus: true,
