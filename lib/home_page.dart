@@ -101,9 +101,12 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           'REELORA',
                           style: GoogleFonts.bebasNeue(
-                            color: const Color.fromARGB(255, 32, 115, 239),
                             fontSize: 36,
                             letterSpacing: 1.5,
+                            foreground: Paint()
+                              ..shader = const LinearGradient(
+                                colors: [Colors.blueAccent, Colors.purpleAccent],
+                              ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                           ),
                         ),
                         const SizedBox(width: 20),

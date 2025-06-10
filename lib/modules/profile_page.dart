@@ -270,7 +270,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
+                          color: Colors.black.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -279,7 +279,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     // Avatar at bottom-left
                     Positioned(
                       bottom: -40,
-                      left: 16,
+                      left: 20,
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -314,7 +314,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20), // 👈 Space for the overlapping avatar
+            const SizedBox(height: 30), // 👈 Space from the overlapping avatar to the information
 
 
               const SizedBox(height: 32),
