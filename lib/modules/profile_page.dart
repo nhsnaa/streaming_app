@@ -3,14 +3,14 @@ import 'package:streaming_app/modules/setting_page.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/widgets/edit_profile_sheet.dart';
 
-class ProfilePopupContent extends StatefulWidget {
-  const ProfilePopupContent({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<ProfilePopupContent> createState() => _ProfilePopupContentState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePopupContentState extends State<ProfilePopupContent> {
+class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _usernameController;
   late TextEditingController _phoneController;
   late TextEditingController _descriptionController;
@@ -133,11 +133,10 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
             SizedBox(
               height: type == 'avatar' ? 120 : 220,
               child: GridView.builder(
-                scrollDirection: Axis.vertical,
                 itemCount: images.length,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: type == 'avatar' ? 100 : 220,
-                  mainAxisExtent: type == 'background' ? 100 : type == 'avatar' ? 100 : 280, //size avatar and background
+                  mainAxisExtent: type == 'avatar' ? 100 : 100,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   childAspectRatio: type == 'avatar' ? 1 : 2.5,
@@ -156,11 +155,9 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                       Navigator.pop(context);
                     },
                     child: type == 'avatar'
-                        ? CircleAvatar(
-                            backgroundImage: AssetImage(images[index]),
-                          )
+                        ? CircleAvatar(backgroundImage: AssetImage(images[index]))
                         : ClipRRect(
-                            borderRadius: BorderRadius.circular(20), //boarder round for background
+                            borderRadius: BorderRadius.circular(20),
                             child: Image.asset(images[index], fit: BoxFit.cover),
                           ),
                   );
@@ -207,7 +204,10 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
       child: ListTile(
         leading: Icon(icon, color: Colors.blueAccent),
         title: Text(label, style: const TextStyle(color: Colors.white70)),
-        subtitle: Text(value.isNotEmpty ? value : 'Not set', style: const TextStyle(color: Colors.white30)),
+        subtitle: Text(
+          value.isNotEmpty ? value : 'Not set',
+          style: const TextStyle(color: Colors.white30),
+        ),
       ),
     );
   }
@@ -236,7 +236,6 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  // Settings icon (top-right)
                   Positioned(
                     top: 5,
                     right: 5,
@@ -249,21 +248,22 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                       },
                     ),
                   ),
-                  // Profile avatar (bottom-left)
                   Positioned(
                     bottom: -40,
                     left: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle, 
-                          gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.purpleAccent]),
-                        ),
-                        padding: const EdgeInsets.all(3),
-                        child: CircleAvatar(
-                          radius: 50, // size circle
-                          backgroundImage: AssetImage(_selectedAvatar),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Colors.blueAccent, Colors.purpleAccent],
                         ),
                       ),
+                      padding: const EdgeInsets.all(3),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage(_selectedAvatar),
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: -2,
@@ -279,10 +279,9 @@ class _ProfilePopupContentState extends State<ProfilePopupContent> {
                         child: const Icon(Icons.edit, size: 20, color: Colors.white60),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
-
               const SizedBox(height: 50),
               _buildInfoTile(Icons.email, 'Email', _email),
               _buildInfoTile(Icons.person, 'Username', _usernameController.text),

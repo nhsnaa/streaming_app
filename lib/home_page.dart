@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     // Show popup when Profile is tapped
     showDialog(
       context: context,
-      builder: (_) => const ProfilePopupContent(),
+      builder: (_) => const ProfilePage(),
     );
   } else {
     setState(() {
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return const FavouritesPage();
       case 3:
-        return const ProfilePopupContent();
+        return const ProfilePage();
       default:
         return const Center(child: Text('Page not found'));
     }
