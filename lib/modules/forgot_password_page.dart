@@ -50,69 +50,87 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock_reset_rounded, size: 80, color: Colors.blueAccent),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Reset Password",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
-                      ),
+        child: Stack(
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                  child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Enter your email and set a new password below.",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 32),
-
-                    buildTextField("Registered Email", emailController, false),
-                    buildTextField("New Password", newPasswordController, true),
-                    buildTextField("Confirm New Password", confirmPasswordController, true),
-
-                    const SizedBox(height: 24),
-
-                    ElevatedButton.icon(
-                      onPressed: resetPassword,
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      label: Text(
-                        'Reset Password',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lock_reset_rounded, size: 80, color: Colors.blueAccent),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Reset Password",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Enter your email and set a new password below.",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70),
                         ),
-                      ),
+                        const SizedBox(height: 32),
+                        buildTextField("Registered Email", emailController, false),
+                        buildTextField("New Password", newPasswordController, true),
+                        buildTextField("Confirm New Password", confirmPasswordController, true),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: resetPassword,
+                          icon: const Icon(Icons.refresh, color: Colors.white),
+                          label: Text(
+                            'Reset Password',
+                            style: GoogleFonts.openSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                )
+              ),
+            ),
+
+            // X (close) button in the top-right corner
+            Positioned(
+              top: 40,
+              right: 20,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white),
                 ),
               ),
-            )
-          ),
+            ),
+          ],
         ),
       ),
     );
