@@ -74,13 +74,11 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
                               height: 300,
-                              
                               color: Colors.grey[900],
                               child: posterPath != null
                                   ? Image.network(
                                       'https://image.tmdb.org/t/p/w500$posterPath',
                                       height: 250,
-                                      
                                       fit: BoxFit.cover,
                                     )
                                   : const Center(
@@ -105,7 +103,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                     isSaved
                                         ? Icons.bookmark_added
                                         : Icons.bookmark_add_outlined,
-                                    color: Colors.white,
+                                    color: Colors.red,
                                     size: 28,
                                   ),
                                   onPressed: () async {
