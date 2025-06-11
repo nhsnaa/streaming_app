@@ -50,34 +50,33 @@ class _SearchResultsState extends State<SearchResults> {
         // Toggle buttons for Movies / TV Shows
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: ['Movies', 'TV Shows'].map((type) {
-              final isSelected = contentType == type;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: TextButton(
-                  onPressed: () {
-                    if (contentType != type) {
-                      setState(() {
-                        contentType = type;
-                        _fetchResults();
-                      });
-                    }
-                  },
-                  child: Text(
-                    type,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 16,
-                      color: isSelected ? Colors.blue : Colors.grey,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+          child: Center(
+            child: ToggleButtons(
+              isSelected: ['Movies', 'TV Shows'].map((type) => contentType == type).toList(),
+              onPressed: (index) {
+                final type = ['Movies', 'TV Shows'][index];
+                if (contentType != type) {
+                  setState(() {
+                    contentType = type;
+                    _fetchResults();
+                  });
+                }
+              },
+              borderColor: Colors.white24,
+              selectedBorderColor: Colors.lightBlue,
+              fillColor: Colors.lightBlue.withOpacity(0.2),
+              selectedColor: Colors.lightBlue,
+              color: Colors.white70,
+              borderRadius: BorderRadius.circular(8),
+              constraints: const BoxConstraints(minHeight: 32, minWidth: 80),
+              children: const [
+                Text('Movies'),
+                Text('TV Shows'),
+              ],
+            ),
           ),
         ),
+
 
         // Results List
         Expanded(
