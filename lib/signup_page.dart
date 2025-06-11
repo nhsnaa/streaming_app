@@ -57,7 +57,6 @@ class SignupPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 36,
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -165,49 +164,7 @@ class SignupPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // OR text
-                      const Text("Or", style: TextStyle(color: Colors.white70)),
-
                       const SizedBox(height: 14),
-
-                      // Google Button
-                      Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(color: Colors.white54),
-                          color: Colors.white.withOpacity(0.1),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            // TODO: Add Google sign-in logic
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: 28,
-                                width: 28,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: AssetImage('assets/images/login_signup/google.png'),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                "Sign Up with Google",
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
                       // Login Redirect
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

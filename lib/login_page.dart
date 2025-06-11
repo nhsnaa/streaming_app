@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streaming_app/home_page.dart';
+import 'package:streaming_app/services/forgot_password_page.dart';
 import 'services/user_data.dart';
 
 class LoginPage extends StatelessWidget {
@@ -58,7 +59,6 @@ class LoginPage extends StatelessWidget {
                           fontSize: 36,
                           color: Colors.white,
                           letterSpacing: 2,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -160,7 +160,10 @@ class LoginPage extends StatelessWidget {
                       // Forgot password
                       TextButton(
                         onPressed: () {
-                          // Add forgot password logic here
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => ForgotPasswordPage()),
+                          );
                         },
                         child: const Text(
                           "Forgot password?",

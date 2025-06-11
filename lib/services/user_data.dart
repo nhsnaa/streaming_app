@@ -123,6 +123,31 @@ class UserData {
     await prefs.remove('loggedInUser');
     _loggedInUser = null;
   }
+
+
+  // Reset password for a user
+static Future<String> resetPassword(String email, String newPassword, String confirmPassword) async {
+  await loadUsersFromPrefs();
+
+  if (email.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+    return 'All fields are required.';
+  }
+
+  if (newPassword != confirmPassword) {
+    return 'Passwords do not match.';
+  }
+
+  final index = _registeredUsers.indexWhere((user) => user['email'] == email);
+  if (index == -1) {
+    return 'Email not found.';
+  }
+
+  _registeredUsers[index]['password'] = newPassword;
+  await saveUsersToPrefs();
+  return 'Password reset successful.';
+}
+
+
 }
 
 
