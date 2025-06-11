@@ -93,7 +93,7 @@ class _MovieWidgetState extends State<MovieWidget> {
 
         // Movie/TV cards in horizontal list
         SizedBox(
-          height: 280,
+          height: 250,
           child: Stack(
             children: [
               // Horizontal scrollable list

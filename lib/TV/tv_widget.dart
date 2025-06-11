@@ -93,7 +93,7 @@ class _TVWidgetState extends State<TVWidget> {
 
         // Movie/TV cards in horizontal list
         SizedBox(
-          height: 280,
+          height: 250,
           child: Stack(
             children: [
               // Horizontal scrollable list
@@ -115,7 +115,7 @@ class _TVWidgetState extends State<TVWidget> {
                           context: context,
                           builder: (_) => MovieInfoDialog(item: show),
                         );
-
+                        
                         if (shouldPlay == true && context.mounted) {
                           Navigator.push(
                             context,
