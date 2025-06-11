@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streaming_app/services/watchlist_manager.dart';
 import '../services/tmdb_service1.dart';
 import '../widgets/detail_page.dart';
 
@@ -41,7 +42,9 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
     final overview = item['overview'] ?? 'No overview';
     final posterPath = item['poster_path'];
     final releaseDate = item['release_date'] ?? item['first_air_date'] ?? 'N/A';
-    final voteAverage = item['vote_average']?.toString() ?? 'N/A';
+    final voteAverage = item['vote_average'] != null
+        ? (item['vote_average'] as num).toStringAsFixed(1)
+        : 'N/A';
     final originalLanguage = item['original_language']?.toUpperCase() ?? 'N/A';
 
     final List<int> genreIds = List<int>.from(item['genre_ids'] ?? []);
@@ -53,7 +56,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
       backgroundColor: const Color.fromARGB(255, 41, 38, 38),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(20), //gap between boarder
+        padding: const EdgeInsets.all(20),
         child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.6,
           width: 600,
@@ -63,43 +66,114 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (posterPath != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            'https://image.tmdb.org/t/p/w500$posterPath',
-                            height: 250,
-                            fit: BoxFit.cover,
+                      // Poster with Watch Later icon
+                      Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: 300,
+                              
+                              color: Colors.grey[900],
+                              child: posterPath != null
+                                  ? Image.network(
+                                      'https://image.tmdb.org/t/p/w500$posterPath',
+                                      height: 250,
+                                      
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.white54,
+                                        size: 50,
+                                      ),
+                                    ),
+                            ),
                           ),
-                        ),
+                          // Bookmark icon (Watch Later)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: FutureBuilder<bool>(
+                              future:
+                                  WatchlistManager.isInWatchlist(item['id']),
+                              builder: (context, snapshot) {
+                                final isSaved = snapshot.data ?? false;
+                                return IconButton(
+                                  icon: Icon(
+                                    isSaved
+                                        ? Icons.bookmark_added
+                                        : Icons.bookmark_add_outlined,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                  onPressed: () async {
+                                    if (isSaved) {
+                                      await WatchlistManager.removeFromWatchlist(
+                                          item['id']);
+                                    } else {
+                                      await WatchlistManager.addToWatchlist(
+                                          item);
+                                    }
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
                       const SizedBox(height: 16),
-                      Text(title,
-                          style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
+
+                      // Title
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
                       const SizedBox(height: 8),
+
+                      // Details
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text('Release: $releaseDate',
                               style: const TextStyle(color: Colors.white70)),
-                          Text('Rating: $voteAverage',
-                              style: const TextStyle(color: Colors.white70)),
+                          Row(
+                            children: [
+                              const Icon(Icons.star,
+                                  color: Colors.amber, size: 18),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$voteAverage/10',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
                           Text('Language: $originalLanguage',
                               style: const TextStyle(color: Colors.white70)),
                           Text('Genres: $genreText',
                               style: const TextStyle(color: Colors.white70)),
                         ],
                       ),
+
                       const SizedBox(height: 12),
+
+                      // Overview text
                       Text(
                         overview,
                         maxLines: 6,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(color: Colors.white70),
                       ),
+
                       const SizedBox(height: 20),
+
+                      // Play trailer button
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.lightBlueAccent,
@@ -113,8 +187,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                             ),
                           );
                         },
-                        icon:
-                            const Icon(Icons.play_arrow, color: Colors.black),
+                        icon: const Icon(Icons.play_arrow, color: Colors.black),
                         label: const Text("Play Trailer",
                             style: TextStyle(color: Colors.black)),
                       ),

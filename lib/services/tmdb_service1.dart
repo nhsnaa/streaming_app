@@ -6,7 +6,7 @@ import '../api_key.dart'; // Your TMDB API key here
 class TMDBService {
   static const String _baseUrl = 'https://api.themoviedb.org/3';
 
-  // Fetch popular movies (example)
+  // Fetch popular movies 
   Future<List<dynamic>> fetchPopularMovies() async {
     final response = await http.get(
       Uri.parse('$_baseUrl/movie/popular?api_key=$tmdbApiKey'),

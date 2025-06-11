@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/user_data.dart';
+import 'package:streaming_app/modules/watch_later_page.dart'; // ✅ New page
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -21,8 +22,8 @@ class SettingsPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              UserData.deleteCurrentUser(); // Implement this in your UserData class
-              Navigator.pop(context); // Close dialog
+              UserData.deleteCurrentUser();
+              Navigator.pop(context);
               Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
@@ -33,7 +34,6 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showHistory(BuildContext context) {
-    // Placeholder for navigation to HistoryPage
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -63,6 +63,16 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.bookmark, color: Colors.white),
+            title: const Text('Watch Later', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WatchLaterPage()),
+              );
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.history, color: Colors.white),
             title: const Text('History', style: TextStyle(color: Colors.white)),
             onTap: () => _showHistory(context),
@@ -81,7 +91,7 @@ class SettingsPage extends StatelessWidget {
             },
           ),
         ],
-      )
+      ),
     );
   }
 }
