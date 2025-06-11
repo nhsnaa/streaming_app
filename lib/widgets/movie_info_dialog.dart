@@ -50,12 +50,13 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
     final String genreText = genreNames.join(', ');
 
     return Dialog(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color.fromARGB(255, 41, 38, 38),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20), //gap between boarder
         child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.6,
+          width: 600,
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
@@ -67,7 +68,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
                             'https://image.tmdb.org/t/p/w500$posterPath',
-                            height: 200,
+                            height: 250,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -79,7 +80,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                               color: Colors.white)),
                       const SizedBox(height: 8),
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text('Release: $releaseDate',
                               style: const TextStyle(color: Colors.white70)),
