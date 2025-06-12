@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:streaming_app/Movies/movie_type.dart';
+
 
 // Importing movie and TV section widgets
+import 'package:streaming_app/Movies/movie_type.dart';
 import 'package:streaming_app/TV/tv_type.dart';
 import 'package:streaming_app/Movies/trending_movies_section.dart';
 import 'package:streaming_app/TV/trending_tv_section.dart';
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage> {
             children: [
                 // ✅ New section with banner + trending list
               if (selectedContentType == 'Movies') ...[
-                TrendingSection(),
+                const TrendingPage(), // replaces your previous TrendingSection
                 MovieType(
                 title: 'Now Playing',
                 fetchMovies: _tmdbService.fetchNowPlayingMovies,
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                 ),
 
               ] else ...[
-                TrendingTVSection(),
+                const TrendingTVPage(),
                 TVType(
                   title: 'Airing Today',
                   fetchTV: _tmdbService.fetchAiringTodayTV,

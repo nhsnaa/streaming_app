@@ -36,7 +36,7 @@ class _MovieWidgetState extends State<MovieWidget> {
         movieShows = shows;
         isLoading = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() => isLoading = false);
     }
@@ -66,107 +66,111 @@ class _MovieWidgetState extends State<MovieWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (movieShows.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          'No content available.',
-          style: TextStyle(color: Colors.white70),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section title
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
-          child: Text(
-            widget.title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32.0), // Space between vertical sections
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            child: Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
 
-        // Poster Row
-        SizedBox(
-          height: 240,
-          child: Stack(
-            children: [
-              // Horizontal Scroll List
-              ListView.builder(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                itemCount: movieShows.length,
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                itemBuilder: (context, index) {
-                  final show = movieShows[index];
+          // Main content: Loading, Empty, or List
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            child: isLoading
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 60),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : movieShows.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Text(
+                          'No content available.',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      )
+                    : SizedBox(
+                        height: 240,
+                        child: Stack(
+                          children: [
+                            // Horizontal scroll list of posters
+                            ListView.builder(
+                              controller: _scrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 48),
+                              itemCount: movieShows.length,
+                              itemBuilder: (context, index) {
+                                final show = movieShows[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 16.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: HoverMovieCard(
+                                      item: show,
+                                      height: 200,
+                                      width: 140,
+                                      onTap: () async {
+                                        final shouldPlay = await showDialog<bool>(
+                                          context: context,
+                                          builder: (_) => MovieInfoDialog(item: show),
+                                        );
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: HoverMovieCard(
-                      item: show,
-                      height: 200,
-                      width: 140,
-                      onTap: () async {
-                        final shouldPlay = await showDialog<bool>(
-                          context: context,
-                          builder: (_) => MovieInfoDialog(item: show),
-                        );
-
-                        if (shouldPlay == true && context.mounted) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => DetailPage(item: show),
+                                        if (shouldPlay == true && context.mounted) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => DetailPage(item: show),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        }
-                      },
-                    ),
-                  );
-                },
-              ),
 
-              // Left scroll button
-              Positioned(
-                left: 0,
-                top: 80,
-                child: _ScrollButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: _scrollLeft,
-                ),
-              ),
+                            // Left scroll button
+                            Positioned(
+                              left: 8,
+                              top: 80,
+                              child: _ScrollButton(
+                                icon: Icons.arrow_back_ios_new_rounded,
+                                onTap: _scrollLeft,
+                              ),
+                            ),
 
-              // Right scroll button
-              Positioned(
-                right: 0,
-                top: 80,
-                child: _ScrollButton(
-                  icon: Icons.arrow_forward_ios_rounded,
-                  onTap: _scrollRight,
-                ),
-              ),
-            ],
+                            // Right scroll button
+                            Positioned(
+                              right: 8,
+                              top: 80,
+                              child: _ScrollButton(
+                                icon: Icons.arrow_forward_ios_rounded,
+                                onTap: _scrollRight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// Custom scroll button with better design
+// Scroll button widget with elevation and circular shape
 class _ScrollButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -179,8 +183,9 @@ class _ScrollButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withOpacity(0.5),
       shape: const CircleBorder(),
+      elevation: 4,
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
