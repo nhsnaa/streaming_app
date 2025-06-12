@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streaming_app/Movies/movie_type.dart';
 
 // Importing movie and TV section widgets
-import 'package:streaming_app/Movies/now_playing_movies.dart';
-import 'package:streaming_app/Movies/popular_movies.dart';
-import 'package:streaming_app/Movies/top_rated_movies.dart';
-import 'package:streaming_app/Movies/upcoming_movies.dart';
-import 'package:streaming_app/TV/airing_today_TV.dart';
-import 'package:streaming_app/TV/on_the_air_TV.dart';
-import 'package:streaming_app/TV/popular_TV.dart';
-import 'package:streaming_app/TV/top_rated_TV.dart';
-import 'package:streaming_app/widgets/trending_section.dart';
-import 'package:streaming_app/widgets/trending_tv_section.dart';
+import 'package:streaming_app/TV/tv_type.dart';
+import 'package:streaming_app/Movies/trending_movies_section.dart';
+import 'package:streaming_app/TV/trending_tv_section.dart';
+import '../services/tmdb_service1.dart';
 
 // Importing app modules
 import 'modules/categories_page.dart';
@@ -31,6 +26,8 @@ class _HomePageState extends State<HomePage> {
   bool isSearching = false;
   String searchQuery = '';
   String selectedContentType = 'Movies';
+
+  final TMDBService _tmdbService = TMDBService();
 
   void updateSearch(String query) {
     setState(() {
@@ -68,16 +65,41 @@ class _HomePageState extends State<HomePage> {
                 // ✅ New section with banner + trending list
               if (selectedContentType == 'Movies') ...[
                 TrendingSection(),
-                NowPlayingMovies(),
-                PopularMovies(),
-                TopRatedMovies(),
-                UpcomingMovies(),
+                MovieType(
+                title: 'Now Playing',
+                fetchMovies: _tmdbService.fetchNowPlayingMovies,
+               ),
+                MovieType(
+                title: 'Popular',
+                fetchMovies: _tmdbService.fetchPopularMovies,
+               ),
+                MovieType(
+                  title: 'Top rated',
+                  fetchMovies: _tmdbService.fetchTopRatedMovies,
+               ),
+                  MovieType(
+                  title: 'Upcoming',
+                  fetchMovies: _tmdbService.fetchUpcomingMovies,
+                ),
+
               ] else ...[
                 TrendingTVSection(),
-                AiringTodayTV(),
-                PopularTV(),
-                TopRatedTV(),
-                OnTheAirTV(),
+                TVType(
+                  title: 'Airing Today',
+                  fetchTV: _tmdbService.fetchAiringTodayTV,
+                ),
+                TVType(
+                  title: 'On The Air',
+                  fetchTV: _tmdbService.fetchOnTheAirTV,
+                ),
+                TVType(
+                  title: 'Popular',
+                  fetchTV: _tmdbService.fetchPopularTV,
+                ),
+                TVType(
+                  title: 'Top Rated',
+                  fetchTV: _tmdbService.fetchTopRatedTV,
+                ),
               ],
             ],
           );
