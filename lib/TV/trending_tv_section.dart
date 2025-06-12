@@ -99,7 +99,7 @@ class _TrendingTVPageState extends State<TrendingTVPage> {
                     ),
                     child: Container(
                       width: 300,
-                      margin: const EdgeInsets.only(right: 16),
+                      margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
@@ -144,10 +144,10 @@ class _TrendingTVPageState extends State<TrendingTVPage> {
                                   ),
                                   child: const Text(
                                     'TRENDING',
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 3),
 
                                 Text(
                                   tv['name'] ?? '',

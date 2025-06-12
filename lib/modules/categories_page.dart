@@ -179,7 +179,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                             child: Text(
                               genre['name'],
-                              style: TextStyle(
+                              style: GoogleFonts.poppins(
                                 color: isSelected ? Colors.white : Colors.white70,
                                 fontWeight: FontWeight.w500,
                               ),

@@ -34,7 +34,7 @@ class _TrendingPageState extends State<TrendingPage> {
   Future<void> fetchTrending() async {
     final movies = await TMDBService().fetchTrendingMovies();
     if (!mounted) return;
-    setState(() => trendingMovies = movies.take(10).toList()); // Limit to 10
+    setState(() => trendingMovies = movies.take(15).toList()); // Limit to 15
   }
 
   // ⏱️ Auto scroll every 4 seconds
@@ -99,7 +99,7 @@ class _TrendingPageState extends State<TrendingPage> {
                     ),
                     child: Container(
                       width: 300,
-                      margin: const EdgeInsets.only(right: 16),
+                      margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
@@ -140,15 +140,15 @@ class _TrendingPageState extends State<TrendingPage> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.redAccent,
+                                    color: Colors.red,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: const Text(
                                     'TRENDING',
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 3),
 
                                 // Title
                                 Text(
