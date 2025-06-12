@@ -13,12 +13,8 @@ class _FavouritesPageState extends State<FavouritesPage> {
   Widget build(BuildContext context) {
     FavoritesManager.sortFavorites();
     final favorites = FavoritesManager.favorites;
-
-
-
-    
-
     return Scaffold(
+      backgroundColor: Colors.black87,
       appBar: AppBar(
         title: const Text('Favourites'),
         backgroundColor: Colors.black,
@@ -33,7 +29,7 @@ class _FavouritesPageState extends State<FavouritesPage> {
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+      
       body: favorites.isEmpty
           ? const Center(
               child: Text(

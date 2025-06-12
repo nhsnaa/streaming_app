@@ -119,6 +119,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black87,
       appBar: _selectedIndex == 0
           ? AppBar(
               backgroundColor: Colors.black,
@@ -178,7 +179,8 @@ class _HomePageState extends State<HomePage> {
                     ),
               actions: [
                 IconButton(
-                  icon: Icon(isSearching ? Icons.close : Icons.search, color: Colors.white),
+                  icon: Icon(isSearching ? Icons.close : Icons.search, 
+                  color: Colors.white70),
                   onPressed: () {
                     setState(() {
                       isSearching = !isSearching;

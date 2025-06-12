@@ -78,10 +78,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
-
     return Scaffold(
+      backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         automaticallyImplyLeading: false, // This hides the back button
         title: isSearching
             ? TextField(
@@ -129,7 +128,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           IconButton(
             icon: Icon(
               isSearching ? Icons.close : Icons.search,
-              color: Colors.white,
+              color: Colors.white70,
             ),
             onPressed: () {
               setState(() {
@@ -145,13 +144,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
     : searchQuery.isNotEmpty
         ? SearchResults(query: searchQuery)
         : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
-
+              const SizedBox(height: 12), //jarak utk genre phase
               // Genre chips
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12), //box of the genre grouped
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -182,7 +179,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                             child: Text(
                               genre['name'],
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
                                 color: isSelected ? Colors.white : Colors.white70,
                                 fontWeight: FontWeight.w500,
                               ),
