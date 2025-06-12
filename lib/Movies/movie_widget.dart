@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/widgets/movie_info_dialog.dart'; 
+import 'package:streaming_app/widgets/movie_info_dialog.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 
@@ -19,60 +19,68 @@ class MovieWidget extends StatefulWidget {
 
 class _MovieWidgetState extends State<MovieWidget> {
   final ScrollController _scrollController = ScrollController();
-  List<dynamic> MovieShows = [];
+  List<dynamic> movieShows = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    loadMovieShows(); // Load the list of movies/shows
+    loadMovieShows();
   }
 
- void loadMovieShows() async {
-  try {
-    final shows = await widget.fetchMovieShows();
-    if (!mounted) return; // Avoid setState if the widget was disposed
-    setState(() {
-      MovieShows = shows;
-      isLoading = false;
-    });
-  } catch (e) {
-    if (!mounted) return; // Also check on error
-    setState(() {
-      isLoading = false;
-    });
+  void loadMovieShows() async {
+    try {
+      final shows = await widget.fetchMovieShows();
+      if (!mounted) return;
+      setState(() {
+        movieShows = shows;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+    }
   }
-}
 
-
-  // Scroll left by 1000px
   void _scrollLeft() {
     _scrollController.animateTo(
-      _scrollController.offset - 1000,
+      _scrollController.offset - 800,
       duration: const Duration(milliseconds: 300),
-      curve: Curves.ease,
+      curve: Curves.easeOut,
     );
   }
 
-  // Scroll right by 1000px
   void _scrollRight() {
     _scrollController.animateTo(
-      _scrollController.offset + 1000,
+      _scrollController.offset + 800,
       duration: const Duration(milliseconds: 300),
-      curve: Curves.ease,
+      curve: Curves.easeOut,
     );
   }
 
   @override
   void dispose() {
-    _scrollController.dispose(); // Clean up the controller
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (movieShows.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'No content available.',
+          style: TextStyle(color: Colors.white70),
+        ),
+      );
     }
 
     return Column(
@@ -80,32 +88,33 @@ class _MovieWidgetState extends State<MovieWidget> {
       children: [
         // Section title
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
           child: Text(
             widget.title,
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
           ),
         ),
 
-        // Movie/TV cards in horizontal list
+        // Poster Row
         SizedBox(
-          height: 250,
+          height: 240,
           child: Stack(
             children: [
-              // Horizontal scrollable list
+              // Horizontal Scroll List
               ListView.builder(
                 controller: _scrollController,
                 scrollDirection: Axis.horizontal,
-                itemCount: MovieShows.length,
+                itemCount: movieShows.length,
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
                 itemBuilder: (context, index) {
-                  final show = MovieShows[index];
+                  final show = movieShows[index];
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsets.only(right: 16.0),
                     child: HoverMovieCard(
                       item: show,
                       height: 200,
@@ -130,33 +139,56 @@ class _MovieWidgetState extends State<MovieWidget> {
                 },
               ),
 
-              // Scroll Left Button
+              // Left scroll button
               Positioned(
                 left: 0,
-                top: 90,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  color: Colors.white,
-                  style: IconButton.styleFrom(backgroundColor: Colors.black45),
-                  onPressed: _scrollLeft,
+                top: 80,
+                child: _ScrollButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: _scrollLeft,
                 ),
               ),
 
-              // Scroll Right Button
+              // Right scroll button
               Positioned(
                 right: 0,
-                top: 90,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  color: Colors.white,
-                  style: IconButton.styleFrom(backgroundColor: Colors.black45),
-                  onPressed: _scrollRight,
+                top: 80,
+                child: _ScrollButton(
+                  icon: Icons.arrow_forward_ios_rounded,
+                  onTap: _scrollRight,
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+// Custom scroll button with better design
+class _ScrollButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ScrollButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.4),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
     );
   }
 }

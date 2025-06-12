@@ -6,6 +6,36 @@ import '../api_key.dart'; // Your TMDB API key here
 class TMDBService {
   static const String _baseUrl = 'https://api.themoviedb.org/3';
 
+
+  //Trending movies
+  Future<List<dynamic>> fetchTrendingMovies() async {
+  final url = Uri.parse('$_baseUrl/trending/movie/day?api_key=$tmdbApiKey');
+
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['results'];
+  } else {
+    throw Exception('Failed to load trending movies');
+  }
+}
+
+//Trending TV
+  Future<List<dynamic>> fetchTrendingTV() async {
+  final url = Uri.parse('$_baseUrl/trending/tv/day?api_key=$tmdbApiKey');
+
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['results'];
+  } else {
+    throw Exception('Failed to load trending TV');
+  }
+}
+
+
   // Fetch popular movies 
   Future<List<dynamic>> fetchPopularMovies() async {
     final response = await http.get(

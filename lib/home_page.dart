@@ -10,6 +10,8 @@ import 'package:streaming_app/TV/airing_today_TV.dart';
 import 'package:streaming_app/TV/on_the_air_TV.dart';
 import 'package:streaming_app/TV/popular_TV.dart';
 import 'package:streaming_app/TV/top_rated_TV.dart';
+import 'package:streaming_app/widgets/trending_section.dart';
+import 'package:streaming_app/widgets/trending_tv_section.dart';
 
 // Importing app modules
 import 'modules/categories_page.dart';
@@ -63,12 +65,15 @@ class _HomePageState extends State<HomePage> {
         } else {
           return ListView(
             children: [
+                // ✅ New section with banner + trending list
               if (selectedContentType == 'Movies') ...[
+                TrendingSection(),
                 NowPlayingMovies(),
                 PopularMovies(),
                 TopRatedMovies(),
                 UpcomingMovies(),
               ] else ...[
+                TrendingTVSection(),
                 AiringTodayTV(),
                 PopularTV(),
                 TopRatedTV(),
