@@ -84,7 +84,7 @@ class _TVWidgetState extends State<TVWidget> {
             ),
           ),
 
-          // Main content: Loading, Empty, or List
+          // Main content
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: isLoading
@@ -101,41 +101,40 @@ class _TVWidgetState extends State<TVWidget> {
                         ),
                       )
                     : SizedBox(
-                        height: 240,
+                        height: 270, // Increased height to allow hover effects
                         child: Stack(
+                          clipBehavior: Clip.none,
                           children: [
                             // Horizontal scroll list of posters
                             ListView.builder(
                               controller: _scrollController,
                               scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.none, // Important!
                               padding: const EdgeInsets.symmetric(horizontal: 48),
                               itemCount: TVShows.length,
                               itemBuilder: (context, index) {
                                 final show = TVShows[index];
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 16.0),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: HoverMovieCard(
-                                      item: show,
-                                      height: 200,
-                                      width: 140,
-                                      onTap: () async {
-                                        final shouldPlay = await showDialog<bool>(
-                                          context: context,
-                                          builder: (_) => MovieInfoDialog(item: show),
-                                        );
+                                  child: HoverMovieCard(
+                                    item: show,
+                                    height: 200,
+                                    width: 140,
+                                    onTap: () async {
+                                      final shouldPlay = await showDialog<bool>(
+                                        context: context,
+                                        builder: (_) => MovieInfoDialog(item: show),
+                                      );
 
-                                        if (shouldPlay == true && context.mounted) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => DetailPage(item: show),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
+                                      if (shouldPlay == true && context.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => DetailPage(item: show),
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
                                 );
                               },

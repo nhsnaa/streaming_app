@@ -149,13 +149,13 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
                               child: Image.network(
                                 'https://image.tmdb.org/t/p/w92${item['poster_path']}',
                                 width: 60,
+                                
                                 fit: BoxFit.cover,
                               ),
                             )
                           : const SizedBox(
-                              width: 60,
-                              child: Icon(Icons.movie, color: Colors.white),
-                            ),
+                            width: 60,
+                          ),
                       Positioned(
                         bottom: 0,
                         child: Container(

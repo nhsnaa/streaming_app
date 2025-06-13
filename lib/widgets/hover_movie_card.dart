@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
 
 class HoverMovieCard extends StatefulWidget {
-  final dynamic item; // The full movie/TV show object
+  final dynamic item; // Movie or TV show data
   final double height;
   final double width;
+  final VoidCallback? onTap; // Optional tap callback
 
   const HoverMovieCard({
     super.key,
     required this.item,
     this.height = 180,
-    this.width = 120, required Future<Null> Function() onTap,
+    this.width = 120,
+    this.onTap,
   });
 
   @override
@@ -20,17 +22,20 @@ class HoverMovieCard extends StatefulWidget {
 class _HoverMovieCardState extends State<HoverMovieCard> {
   bool _isHovered = false;
 
-  // Show dialog with movie/TV details when tapped
+  // Tap handler: use custom callback if provided, else show default dialog
   void _handleTap() {
-    showDialog(
-      context: context,
-      builder: (context) => MovieInfoDialog(item: widget.item),
-    );
+    if (widget.onTap != null) {
+      widget.onTap!();
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => MovieInfoDialog(item: widget.item),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Correct way to get the image URL from item
     final imageUrl = 'https://image.tmdb.org/t/p/w500${widget.item['poster_path']}';
 
     return MouseRegion(
@@ -41,6 +46,7 @@ class _HoverMovieCardState extends State<HoverMovieCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOut,
+          transformAlignment: Alignment.center,
           height: widget.height,
           width: widget.width,
           transform: _isHovered
@@ -64,10 +70,16 @@ class _HoverMovieCardState extends State<HoverMovieCard> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // ✅ Load poster image
+              // ✅ Poster Image with loading indicator
               Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  );
+                },
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: Colors.grey,
@@ -94,7 +106,7 @@ class _HoverMovieCardState extends State<HoverMovieCard> {
                 ),
               ),
 
-              // ✅ Play icon appears on hover
+              // ✅ Center play icon on hover
               if (_isHovered)
                 const Center(
                   child: Icon(
@@ -110,11 +122,3 @@ class _HoverMovieCardState extends State<HoverMovieCard> {
     );
   }
 }
-
-
-
-
-
-
-
-

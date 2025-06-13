@@ -79,7 +79,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget build(BuildContext context) {
     final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: const Color.fromARGB(255, 39, 38, 38),
       appBar: AppBar(
         automaticallyImplyLeading: false, // This hides the back button
         title: isSearching
