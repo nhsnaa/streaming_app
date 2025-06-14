@@ -36,7 +36,7 @@ class _TrendingPageState extends State<TrendingPage> {
   Future<void> fetchTrending() async {
     final movies = await TMDBService().fetchTrendingMovies();
     if (!mounted) return;
-    setState(() => trendingMovies = movies.take(15).toList()); // Limit to 15
+    setState(() => trendingMovies = movies.take(20).toList()); // Limit to 15
   }
 
   // ⏱️ Auto scroll every 4 seconds
