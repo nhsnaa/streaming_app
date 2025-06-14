@@ -15,6 +15,7 @@ class MovieInfoDialog extends StatefulWidget {
 class _MovieInfoDialogState extends State<MovieInfoDialog> {
   Map<int, String> genreMap = {};
   bool isLoading = true;
+  bool _isExpanded = false; // 🔽 Controls overview expansion
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                   children: [
                     Row(
                       children: [
-                        // Left: Poster
+                        // 🔳 Left: Poster
                         Expanded(
                           flex: 2,
                           child: ClipRRect(
@@ -90,9 +91,10 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: 20),
 
-                        // Right: Info
+                        // 📝 Right: Info Section
                         Expanded(
                           flex: 3,
                           child: SingleChildScrollView(
@@ -110,42 +112,55 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // ℹ️ Details
-                                Wrap(
-                                  spacing: 12,
-                                  runSpacing: 6,
+                                // ℹ️ Metadata (Release, Rating, Lang, Genre)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Release: $releaseDate',
-                                        style: const TextStyle(color: Colors.white70)),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.star, color: Colors.amber, size: 18),
-                                        const SizedBox(width: 4),
-                                        Text('$voteAverage/10',
-                                            style: const TextStyle(color: Colors.white70)),
-                                      ],
-                                    ),
-                                    Text('Language: $originalLanguage',
-                                        style: const TextStyle(color: Colors.white70)),
-                                    Text('Genres: $genreText',
-                                        style: const TextStyle(color: Colors.white70)),
+                                    _buildDetailRow('Release Date:', releaseDate),
+                                    _buildDetailRowWithIcon(Icons.star, '$voteAverage/10'),
+                                    _buildDetailRow('Language:', originalLanguage),
+                                    _buildDetailRow('Genres:', genreText),
                                   ],
                                 ),
 
                                 const SizedBox(height: 16),
 
-                                // 📄 Overview
+                                // 📄 Overview Section with Read More
+                                const Text(
+                                  'Overview:',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                ),
+                                const SizedBox(height: 8),
+
                                 Text(
                                   overview,
-                                  maxLines: 6,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.white70),
+                                  maxLines: _isExpanded ? null : 4,
+                                  overflow:
+                                      _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                                  style:
+                                      const TextStyle(color: Colors.white70, height: 1.5),
                                 ),
 
-                                const SizedBox(height: 24),
+                                // 🔽 Read More Toggle
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isExpanded = !_isExpanded;
+                                    });
+                                  },
+                                  child: Text(
+                                    _isExpanded ? 'Show less ▲' : 'Read more ▼',
+                                    style: const TextStyle(
+                                        color: Colors.lightBlueAccent),
+                                  ),
+                                ),
 
-                                // ▶️ Play Trailer
+                                const SizedBox(height: 12),
+
+                                // ▶️ Play Trailer Button
                                 ElevatedButton.icon(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.lightBlueAccent,
@@ -154,7 +169,8 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                     Navigator.pop(context, true);
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (_) => DetailPage(item: item)),
+                                      MaterialPageRoute(
+                                          builder: (_) => DetailPage(item: item)),
                                     );
                                   },
                                   icon: const Icon(Icons.play_arrow, color: Colors.black),
@@ -168,7 +184,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                       ],
                     ),
 
-                    // 🔖 Floating bookmark icon at top-right
+                    // 🔖 Floating Bookmark Icon (Top Right)
                     Positioned(
                       top: -5,
                       right: -5,
@@ -177,12 +193,13 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                         builder: (context, snapshot) {
                           final isSaved = snapshot.data ?? false;
                           return Material(
-                            color:const Color.fromARGB(255, 41, 38, 38),
+                            color: const Color.fromARGB(255, 41, 38, 38),
                             borderRadius: BorderRadius.circular(12),
-                            //elevation: 12, example code for the boarder fade or not idk
                             child: IconButton(
                               icon: Icon(
-                                isSaved ? Icons.bookmark_added : Icons.bookmark_add_outlined,
+                                isSaved
+                                    ? Icons.bookmark_added
+                                    : Icons.bookmark_add_outlined,
                                 color: Colors.redAccent,
                                 size: 25,
                               ),
@@ -202,6 +219,32 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                   ],
                 ),
         ),
+      ),
+    );
+  }
+
+  // 🔧 Helper widget for label + value
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        '$label $value',
+        style: const TextStyle(color: Colors.white70),
+      ),
+    );
+  }
+
+  // ⭐ Helper widget for row with icon and text (e.g., rating)
+  Widget _buildDetailRowWithIcon(IconData icon, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.amber, size: 18),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(color: Colors.white70)),
+        ],
       ),
     );
   }
