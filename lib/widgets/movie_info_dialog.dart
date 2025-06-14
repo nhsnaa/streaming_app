@@ -56,29 +56,28 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
       backgroundColor: const Color.fromARGB(255, 41, 38, 38),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(12),
         child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.6,
           width: 600,
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Poster with Watch Later icon
-                      Stack(
+              : Row(
+                  children: [
+                    // Left: Poster + Bookmark
+                    Expanded(
+                      flex: 2,
+                      child: Stack(
                         alignment: Alignment.topRight,
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              height: 300,
+                              height: double.infinity,
                               color: Colors.grey[900],
                               child: posterPath != null
                                   ? Image.network(
                                       'https://image.tmdb.org/t/p/w500$posterPath',
-                                      height: 250,
                                       fit: BoxFit.cover,
                                     )
                                   : const Center(
@@ -90,12 +89,11 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                     ),
                             ),
                           ),
-                          // Bookmark icon (Watch Later)
+                          // 🔖 Bookmark icon
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: FutureBuilder<bool>(
-                              future:
-                                  WatchlistManager.isInWatchlist(item['id']),
+                              future: WatchlistManager.isInWatchlist(item['id']),
                               builder: (context, snapshot) {
                                 final isSaved = snapshot.data ?? false;
                                 return IconButton(
@@ -108,11 +106,9 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                   ),
                                   onPressed: () async {
                                     if (isSaved) {
-                                      await WatchlistManager.removeFromWatchlist(
-                                          item['id']);
+                                      await WatchlistManager.removeFromWatchlist(item['id']);
                                     } else {
-                                      await WatchlistManager.addToWatchlist(
-                                          item);
+                                      await WatchlistManager.addToWatchlist(item);
                                     }
                                     setState(() {});
                                   },
@@ -122,75 +118,82 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                           ),
                         ],
                       ),
+                    ),
 
-                      const SizedBox(height: 16),
+                    const SizedBox(width: 20),
 
-                      // Title
-                      Text(
-                        title,
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Details
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text('Release: $releaseDate',
-                              style: const TextStyle(color: Colors.white70)),
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 18),
-                              const SizedBox(width: 4),
-                              Text(
-                                '$voteAverage/10',
-                                style: const TextStyle(color: Colors.white70),
+                    // Right: Info
+                    Expanded(
+                      flex: 3,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🎬 Title
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                            ],
-                          ),
-                          Text('Language: $originalLanguage',
-                              style: const TextStyle(color: Colors.white70)),
-                          Text('Genres: $genreText',
-                              style: const TextStyle(color: Colors.white70)),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Overview text
-                      Text(
-                        overview,
-                        maxLines: 6,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Play trailer button
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlueAccent,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => DetailPage(item: item),
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.play_arrow, color: Colors.black),
-                        label: const Text("Play Trailer",
-                            style: TextStyle(color: Colors.black)),
+                            const SizedBox(height: 12),
+
+                            // ℹ️ Details
+                            Wrap(
+                              runSpacing: 6,
+                              children: [
+                                Text('Release: $releaseDate',
+                                    style: const TextStyle(color: Colors.white70)),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.star, color: Colors.amber, size: 18),
+                                    const SizedBox(width: 4),
+                                    Text('$voteAverage/10',
+                                        style: const TextStyle(color: Colors.white70)),
+                                  ],
+                                ),
+                                Text('Language: $originalLanguage',
+                                    style: const TextStyle(color: Colors.white70)),
+                                Text('Genres: $genreText',
+                                    style: const TextStyle(color: Colors.white70)),
+                              ],
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // 📄 Overview
+                            Text(
+                              overview,
+                              maxLines: 6,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // ▶️ Play Trailer
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.lightBlueAccent,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => DetailPage(item: item)),
+                                );
+                              },
+                              icon: const Icon(Icons.play_arrow, color: Colors.black),
+                              label: const Text("Play Trailer",
+                                  style: TextStyle(color: Colors.black)),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
         ),
       ),
