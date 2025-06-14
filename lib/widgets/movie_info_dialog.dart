@@ -62,15 +62,15 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
           width: 600,
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : Row(
+              : Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    // Left: Poster + Bookmark
-                    Expanded(
-                      flex: 2,
-                      child: Stack(
-                        alignment: Alignment.topRight,
-                        children: [
-                          ClipRRect(
+                    Row(
+                      children: [
+                        // Left: Poster
+                        Expanded(
+                          flex: 2,
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
                               height: double.infinity,
@@ -89,108 +89,114 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                     ),
                             ),
                           ),
-                          // 🔖 Bookmark icon
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: FutureBuilder<bool>(
-                              future: WatchlistManager.isInWatchlist(item['id']),
-                              builder: (context, snapshot) {
-                                final isSaved = snapshot.data ?? false;
-                                return IconButton(
-                                  icon: Icon(
-                                    isSaved
-                                        ? Icons.bookmark_added
-                                        : Icons.bookmark_add_outlined,
-                                    color: Colors.red,
-                                    size: 28,
-                                  ),
-                                  onPressed: () async {
-                                    if (isSaved) {
-                                      await WatchlistManager.removeFromWatchlist(item['id']);
-                                    } else {
-                                      await WatchlistManager.addToWatchlist(item);
-                                    }
-                                    setState(() {});
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                        const SizedBox(width: 20),
 
-                    const SizedBox(width: 20),
-
-                    // Right: Info
-                    Expanded(
-                      flex: 3,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 🎬 Title
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // ℹ️ Details
-                            Wrap(
-                              runSpacing: 6,
+                        // Right: Info
+                        Expanded(
+                          flex: 3,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Release: $releaseDate',
-                                    style: const TextStyle(color: Colors.white70)),
-                                Row(
+                                // 🎬 Title
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // ℹ️ Details
+                                Wrap(
+                                  spacing: 12,
+                                  runSpacing: 6,
                                   children: [
-                                    const Icon(Icons.star, color: Colors.amber, size: 18),
-                                    const SizedBox(width: 4),
-                                    Text('$voteAverage/10',
+                                    Text('Release: $releaseDate',
+                                        style: const TextStyle(color: Colors.white70)),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.star, color: Colors.amber, size: 18),
+                                        const SizedBox(width: 4),
+                                        Text('$voteAverage/10',
+                                            style: const TextStyle(color: Colors.white70)),
+                                      ],
+                                    ),
+                                    Text('Language: $originalLanguage',
+                                        style: const TextStyle(color: Colors.white70)),
+                                    Text('Genres: $genreText',
                                         style: const TextStyle(color: Colors.white70)),
                                   ],
                                 ),
-                                Text('Language: $originalLanguage',
-                                    style: const TextStyle(color: Colors.white70)),
-                                Text('Genres: $genreText',
-                                    style: const TextStyle(color: Colors.white70)),
+
+                                const SizedBox(height: 16),
+
+                                // 📄 Overview
+                                Text(
+                                  overview,
+                                  maxLines: 6,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                // ▶️ Play Trailer
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightBlueAccent,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(context, true);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => DetailPage(item: item)),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.play_arrow, color: Colors.black),
+                                  label: const Text("Play Trailer",
+                                      style: TextStyle(color: Colors.black)),
+                                ),
                               ],
                             ),
-
-                            const SizedBox(height: 16),
-
-                            // 📄 Overview
-                            Text(
-                              overview,
-                              maxLines: 6,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // ▶️ Play Trailer
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.lightBlueAccent,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context, true);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => DetailPage(item: item)),
-                                );
-                              },
-                              icon: const Icon(Icons.play_arrow, color: Colors.black),
-                              label: const Text("Play Trailer",
-                                  style: TextStyle(color: Colors.black)),
-                            ),
-                          ],
+                          ),
                         ),
+                      ],
+                    ),
+
+                    // 🔖 Floating bookmark icon at top-right
+                    Positioned(
+                      top: -5,
+                      right: -5,
+                      child: FutureBuilder<bool>(
+                        future: WatchlistManager.isInWatchlist(item['id']),
+                        builder: (context, snapshot) {
+                          final isSaved = snapshot.data ?? false;
+                          return Material(
+                            color:const Color.fromARGB(255, 41, 38, 38),
+                            borderRadius: BorderRadius.circular(12),
+                            //elevation: 12, example code for the boarder fade or not idk
+                            child: IconButton(
+                              icon: Icon(
+                                isSaved ? Icons.bookmark_added : Icons.bookmark_add_outlined,
+                                color: Colors.redAccent,
+                                size: 25,
+                              ),
+                              onPressed: () async {
+                                if (isSaved) {
+                                  await WatchlistManager.removeFromWatchlist(item['id']);
+                                } else {
+                                  await WatchlistManager.addToWatchlist(item);
+                                }
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
