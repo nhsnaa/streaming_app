@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
+import 'package:streaming_app/services/watchlist_manager.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
 
 class TrendingTVPage extends StatefulWidget {
@@ -170,7 +171,47 @@ class _TrendingTVPageState extends State<TrendingTVPage> {
                                     ),
                                   ],
                                 ),
-
+                                // ⭐ Rating and 🔖 Bookmark
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          (tv['vote_average'] as double).toStringAsFixed(1),
+                                          style: const TextStyle(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ),
+                                    FutureBuilder<bool>(
+                                      future: WatchlistManager.isInWatchlist(tv['id']),
+                                      builder: (context, snapshot) {
+                                        final isSaved = snapshot.data ?? false;
+                                        return IconButton(
+                                          icon: Icon(
+                                            isSaved
+                                                ? Icons.bookmark_added
+                                                : Icons.bookmark_add_outlined,
+                                            color: Colors.red,
+                                            size: 22,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () async {
+                                            if (isSaved) {
+                                              await WatchlistManager.removeFromWatchlist(tv['id']);
+                                            } else {
+                                              await WatchlistManager.addToWatchlist(tv);
+                                            }
+                                            setState(() {});
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   (tv['overview'] as String).length > 80

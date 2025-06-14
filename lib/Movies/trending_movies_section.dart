@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
+import 'package:streaming_app/services/watchlist_manager.dart';
+
 
 class TrendingPage extends StatefulWidget {
   const TrendingPage({super.key});
@@ -163,17 +165,47 @@ class _TrendingPageState extends State<TrendingPage> {
                                 ),
 
                                 // Review/Rating
+                                // ⭐ Rating and 🔖 Bookmark
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      (movie['vote_average'] as double).toStringAsFixed(1),
-                                      style: const TextStyle(color: Colors.white70),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          (movie['vote_average'] as double).toStringAsFixed(1),
+                                          style: const TextStyle(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ),
+                                    FutureBuilder<bool>(
+                                      future: WatchlistManager.isInWatchlist(movie['id']),
+                                      builder: (context, snapshot) {
+                                        final isSaved = snapshot.data ?? false;
+                                        return IconButton(
+                                          icon: Icon(
+                                            isSaved
+                                                ? Icons.bookmark_added
+                                                : Icons.bookmark_add_outlined,
+                                            color: Colors.red,
+                                            size: 22,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () async {
+                                            if (isSaved) {
+                                              await WatchlistManager.removeFromWatchlist(movie['id']);
+                                            } else {
+                                              await WatchlistManager.addToWatchlist(movie);
+                                            }
+                                            setState(() {});
+                                          },
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 4),
                                 Text(
                                   (movie['overview'] as String).length > 80
