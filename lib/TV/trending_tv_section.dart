@@ -161,16 +161,6 @@ class _TrendingTVPageState extends State<TrendingTVPage> {
                                   ),
                                 ),
 
-                                Row(
-                                  children: [
-                                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      (tv['vote_average'] as double).toStringAsFixed(1),
-                                      style: const TextStyle(color: Colors.white70),
-                                    ),
-                                  ],
-                                ),
                                 // ⭐ Rating and 🔖 Bookmark
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
