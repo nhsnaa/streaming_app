@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
-import 'package:streaming_app/widgets/detail_page.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 
 class MovieWidget extends StatefulWidget {
@@ -121,20 +120,11 @@ class _MovieWidgetState extends State<MovieWidget> {
                                     height: 200,
                                     width: 140,
                                     onTap: () async {
-                                      final shouldPlay = await showDialog<bool>(
-                                        context: context,
-                                        builder: (_) => MovieInfoDialog(item: show),
-                                      );
-
-                                      if (shouldPlay == true && context.mounted) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => DetailPage(item: show),
-                                          ),
-                                        );
-                                      }
-                                    },
+                                      showDialog(
+                                      context: context,
+                                      builder: (_) => MovieInfoDialog(item: show),
+                                    );
+                                  },
                                   ),
                                 );
                               },

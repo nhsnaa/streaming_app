@@ -32,8 +32,6 @@ class _DetailPageState extends State<DetailPage> {
         ? await _tmdbService.fetchYoutubeTrailer(id)
         : await _tmdbService.fetchYoutubeTVTrailer(id);
 
-    if (!mounted) return; // ✅ Avoid setState if widget was disposed
-
     _hasTriedVideo = true;
 
     if (key != null) {
@@ -45,24 +43,15 @@ class _DetailPageState extends State<DetailPage> {
           showControls: true,
         ),
       );
-
-      if (mounted) {
-        setState(() {
-          _isVideoReady = true;
-        });
-      }
+      setState(() => _isVideoReady = true);
     } else {
-      if (mounted) {
-        setState(() {
-          _isVideoReady = false;
-        });
-      }
+      setState(() => _isVideoReady = false);
     }
   }
 
   @override
   void dispose() {
-    _controller?.close();
+    _controller?.close(); // Properly dispose the player
     super.dispose();
   }
 
@@ -78,9 +67,9 @@ class _DetailPageState extends State<DetailPage> {
             final maxWidth = constraints.maxWidth;
             final maxHeight = constraints.maxHeight;
 
+            // Maintain 16:9 aspect ratio
             double videoWidth = maxWidth;
             double videoHeight = videoWidth * 9 / 16;
-
             if (videoHeight > maxHeight) {
               videoHeight = maxHeight;
               videoWidth = videoHeight * 16 / 9;
@@ -118,17 +107,16 @@ class _DetailPageState extends State<DetailPage> {
                                     ),
                                 ],
                               )
-                            : Container(
-                                color: Colors.black,
-                                child: const Center(
-                                  child: Text(
-                                    'No trailer available',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                            : const Center(
+                                child: Text(
+                                  'No trailer available',
+                                  style: TextStyle(color: Colors.white),
                                 ),
                               )),
                   ),
                 ),
+
+                // ⬅️ Back Button
                 Positioned(
                   top: 10,
                   left: 10,
@@ -137,7 +125,7 @@ class _DetailPageState extends State<DetailPage> {
                       color: Colors.black45,
                       child: InkWell(
                         splashColor: Colors.white24,
-                        onTap: () => Navigator.of(context).pop(),
+                        onTap: () => Navigator.of(context).pop(), // Just close
                         child: const SizedBox(
                           width: 40,
                           height: 40,
@@ -159,8 +147,3 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 }
-
-
-
-
-

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/watchlist_manager.dart';
 import '../widgets/movie_info_dialog.dart';
-import '../widgets/detail_page.dart';
 
 class WatchLaterPage extends StatefulWidget {
   const WatchLaterPage({super.key});
@@ -187,18 +186,10 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
                   ),
                   onTap: () async {
                     // Open MovieInfoDialog
-                    final shouldPlay = await showDialog<bool>(
+                      showDialog(
                       context: context,
                       builder: (_) => MovieInfoDialog(item: item),
-                    );
-                    if (shouldPlay == true && context.mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DetailPage(item: item),
-                        ),
-                      );
-                    }
+                      );              
                   },
                 ),
               )),

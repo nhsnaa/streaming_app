@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/tmdb_service1.dart';
-import 'package:streaming_app/widgets/detail_page.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
 
 
@@ -132,17 +131,11 @@ class _SearchResultsState extends State<SearchResults> {
                     ),
 
                     onTap: () async {
-                      final shouldPlay = await showDialog<bool>(
+                      showDialog(
                         context: context,
                         builder: (_) => MovieInfoDialog(item: item),
                       );
-                      if (shouldPlay == true && context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => DetailPage(item: item)),
-                        );
-                      }
-                    },
+                    },                  
                   );
                 },
               );

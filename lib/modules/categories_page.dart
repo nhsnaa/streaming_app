@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
-import 'package:streaming_app/widgets/detail_page.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
 import 'package:streaming_app/search_results.dart';
@@ -237,19 +236,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                   height: 200,
                                   width: double.infinity,
                                   onTap: () async {
-                                    final shouldPlay = await showDialog<bool>(
+                                      showDialog(
                                       context: context,
                                       builder: (_) => MovieInfoDialog(item: item),
                                     );
-
-                                    if (shouldPlay == true && context.mounted) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => DetailPage(item: item),
-                                        ),
-                                      );
-                                    }
                                   },
                                 ),
                                 const SizedBox(height: 8),
