@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/detail_page.dart';
+import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
 import 'package:streaming_app/search_results.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -17,6 +16,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   List<Map<String, dynamic>> movieGenres = [];
   List<Map<String, dynamic>> tvGenres = [];
   List<dynamic> items = [];
+
   bool isLoading = false;
   bool isSearching = false;
 
@@ -31,6 +31,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     _loadGenresAndContent();
   }
 
+  // Load genres and initial content based on selected type (Movies or TV)
   Future<void> _loadGenresAndContent() async {
     setState(() => isLoading = true);
 
@@ -57,6 +58,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     setState(() => isLoading = false);
   }
 
+  // Load movie/TV content by genre
   Future<void> _loadContentByGenre(int genreId) async {
     setState(() => isLoading = true);
 
@@ -75,13 +77,51 @@ class _CategoriesPageState extends State<CategoriesPage> {
     setState(() => isLoading = false);
   }
 
+  // Show a bottom sheet to pick genre (Netflix-style)
+  void _showGenrePicker(BuildContext context) {
+    final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color.fromARGB(255, 39, 38, 38),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return ListView(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          children: genres.map((genre) {
+            final isSelected = genre['name'] == selectedGenre;
+
+            return ListTile(
+              title: Text(
+                genre['name'],
+                style: TextStyle(
+                  color: isSelected ? Colors.lightBlueAccent : Colors.white70,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context); // close bottom sheet
+                setState(() {
+                  selectedGenre = genre['name'];
+                  selectedGenreId = genre['id'];
+                });
+                _loadContentByGenre(selectedGenreId);
+              },
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final genres = selectedType == 'Movies' ? movieGenres : tvGenres;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 39, 38, 38),
       appBar: AppBar(
-        automaticallyImplyLeading: false, // This hides the back button
+        automaticallyImplyLeading: false,
         title: isSearching
             ? TextField(
                 autofocus: true,
@@ -140,122 +180,97 @@ class _CategoriesPageState extends State<CategoriesPage> {
         ],
       ),
       body: isLoading
-    ? const Center(child: CircularProgressIndicator())
-    : searchQuery.isNotEmpty
-        ? SearchResults(query: searchQuery)
-        : Column(
-            children: [
-              const SizedBox(height: 12), //jarak utk genre phase
-              // Genre chips
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12), //box of the genre grouped
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: genres.map((genre) {
-                      final isSelected = selectedGenre == genre['name'];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedGenre = genre['name'];
-                              selectedGenreId = genre['id'];
-                            });
-                            _loadContentByGenre(selectedGenreId);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            gradient: isSelected
-                                ? const LinearGradient(
-                                    colors: [Colors.blueAccent, Colors.purpleAccent],
-                                  )
-                                : null,
-                            color: isSelected ? null : Colors.grey[850],
-                            ),
+          ? const Center(child: CircularProgressIndicator())
+          : searchQuery.isNotEmpty
+              ? SearchResults(query: searchQuery)
+              : Column(
+                  children: [
+                    const SizedBox(height: 12),
 
-                            child: Text(
-                              genre['name'],
-                              style: GoogleFonts.poppins(
-                                color: isSelected ? Colors.white : Colors.white70,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
+                    // Genre selection button (tap to choose genre)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[850],
+                          foregroundColor: Colors.white70,
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Grid view of content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: GridView.builder(
-                    itemCount: items.length,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 160, // Max width of each card
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20, //between card
-                    childAspectRatio: 0.6, //space between card in a row
-                  ),
-
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final title = selectedType == 'Movies'
-                          ? item['title']
-                          : item['name'];
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          HoverMovieCard(
-                            item: item,
-                            height: 200,
-                            width: double.infinity,
-                            onTap: () async {
-                              final shouldPlay = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => MovieInfoDialog(item: item),
-                              );
-
-                              if (shouldPlay == true && context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DetailPage(item: item),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            title ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                        onPressed: () => _showGenrePicker(context),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              selectedGenre.isEmpty ? 'Select Genre' : selectedGenre,
+                              style: const TextStyle(fontSize: 16),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+                            const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white70),
+                          ],
+                        ),
+                      ),
+                    ),
 
+                    const SizedBox(height: 16),
+
+                    // Grid of movie/TV posters
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: GridView.builder(
+                          itemCount: items.length,
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 160,
+                            mainAxisSpacing: 20,
+                            crossAxisSpacing: 20,
+                            childAspectRatio: 0.6,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            final title = selectedType == 'Movies' ? item['title'] : item['name'];
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                HoverMovieCard(
+                                  item: item,
+                                  height: 200,
+                                  width: double.infinity,
+                                  onTap: () async {
+                                    final shouldPlay = await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => MovieInfoDialog(item: item),
+                                    );
+
+                                    if (shouldPlay == true && context.mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DetailPage(item: item),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  title ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 }
