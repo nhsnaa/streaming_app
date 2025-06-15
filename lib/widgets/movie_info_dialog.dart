@@ -112,6 +112,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 ),
                                 const SizedBox(height: 12),
 
+                                //Text('Release: ${item['release_date']}', style: TextStyle(color: Colors.white70)),
                                 // ℹ️ Metadata (Release, Rating, Lang, Genre)
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

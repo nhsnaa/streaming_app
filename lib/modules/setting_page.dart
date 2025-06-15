@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:streaming_app/modules/feedback_form_page.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/modules/watch_later_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  // Show confirmation dialog before deleting account
+  // Delete Account confirmation
   void _confirmDeleteAccount(BuildContext context) {
     showDialog(
       context: context,
@@ -34,7 +35,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // Show watch history (placeholder dialog)
+  // Watch History placeholder
   void _showHistory(BuildContext context) {
     showDialog(
       context: context,
@@ -53,37 +54,36 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // Show confirmation dialog before logging out
-void _confirmLogout(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      backgroundColor: Colors.grey[900],
-      title: const Text('Log Out', style: TextStyle(color: Colors.white)),
-      content: const Text(
-        'Are you sure you want to log out?',
-        style: TextStyle(color: Colors.white70),
+  // Log out confirmation
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Log Out', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Are you sure you want to log out?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.blueAccent)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await UserData.logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            },
+            child: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel', style: TextStyle(color: Colors.blueAccent)),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.pop(context); // Close the dialog
-            await UserData.logout();
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-          },
-          child: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 
-
-  // Build a styled section title
+  // Build section title
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -99,14 +99,15 @@ void _confirmLogout(BuildContext context) {
     );
   }
 
-  // Build individual setting tile
-  Widget _buildTile(
-      {required IconData icon,
-      required String title,
-      Color iconColor = Colors.white,
-      required VoidCallback onTap}) {
+  // Build individual tile
+  Widget _buildTile({
+    required IconData icon,
+    required String title,
+    Color iconColor = Colors.white,
+    required VoidCallback onTap,
+  }) {
     return Card(
-      color: const Color(0xFF1C1C1E), // Slightly lighter than black
+      color: const Color(0xFF1C1C1E),
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,9 +132,7 @@ void _confirmLogout(BuildContext context) {
       ),
       body: ListView(
         children: [
-          // ----- PERSONAL SECTION -----
           _buildSectionTitle('PERSONAL'),
-
           _buildTile(
             icon: Icons.bookmark,
             title: 'Watch Later',
@@ -150,12 +149,9 @@ void _confirmLogout(BuildContext context) {
             onTap: () => _showHistory(context),
           ),
 
-          // Divider between sections
           const SizedBox(height: 16),
 
-          // ----- ACCOUNT SECTION -----
           _buildSectionTitle('ACCOUNT'),
-
           _buildTile(
             icon: Icons.delete_forever,
             title: 'Delete Account',
@@ -168,6 +164,20 @@ void _confirmLogout(BuildContext context) {
             onTap: () => _confirmLogout(context),
           ),
 
+          const SizedBox(height: 16),
+
+          _buildSectionTitle('SUPPORT'),
+          //feedback called
+          _buildTile(
+          icon: Icons.feedback_outlined,
+          title: 'Send Feedback',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FeedbackFormPage()),
+            );
+          },
+        ),
           const SizedBox(height: 20),
         ],
       ),
