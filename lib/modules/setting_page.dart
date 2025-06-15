@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/modules/feedback_form_page.dart';
+import 'package:streaming_app/modules/feedback_page.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/modules/watch_later_page.dart';
 
@@ -174,7 +174,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FeedbackFormPage()),
+              MaterialPageRoute(builder: (_) => const FeedbackPage()),
             );
           },
         ),
