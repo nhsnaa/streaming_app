@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/tmdb_service1.dart';
+import '../../services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
 
 

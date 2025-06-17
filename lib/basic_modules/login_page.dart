@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:streaming_app/home_page.dart';
-import 'package:streaming_app/modules/forgot_password_page.dart';
-import '../services/user_data.dart';
+import 'package:streaming_app/modules/home_page.dart';
+import 'package:streaming_app/basic_modules/forgot_password_page.dart';
+import '../../services/user_data.dart';
 
 class LoginPage extends StatelessWidget {
   final emailController = TextEditingController();

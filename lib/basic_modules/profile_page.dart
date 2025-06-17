@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/modules/setting_page.dart';
+import 'package:streaming_app/basic_modules/setting_page.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/widgets/edit_profile_sheet.dart';
 

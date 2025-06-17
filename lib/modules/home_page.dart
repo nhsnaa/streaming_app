@@ -7,12 +7,12 @@ import 'package:streaming_app/Movies/movie_type.dart';
 import 'package:streaming_app/TV/tv_type.dart';
 import 'package:streaming_app/Movies/trending_movies_section.dart';
 import 'package:streaming_app/TV/trending_tv_section.dart';
-import '../services/tmdb_service1.dart';
+import '../../services/tmdb_service1.dart';
 
 // Importing app modules
-import 'modules/categories_page.dart';
-import 'modules/favourites_page.dart';
-import 'modules/profile_page.dart';
+import 'categories_page.dart';
+import 'favourites_page.dart';
+import '../basic_modules/profile_page.dart';
 import 'search_results.dart';
 
 class HomePage extends StatefulWidget {

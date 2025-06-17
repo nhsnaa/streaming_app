@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/home_page.dart';
+import 'package:streaming_app/modules/home_page.dart';
 import 'package:streaming_app/modules/categories_page.dart';
 import 'package:streaming_app/services/user_data.dart';
-import 'intro_page.dart';
-import 'login_page.dart';
-import 'signup_page.dart';
+import 'basic_modules/intro_page.dart';
+import 'basic_modules/login_page.dart';
+import 'basic_modules/signup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

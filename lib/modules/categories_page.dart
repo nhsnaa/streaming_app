@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/widgets/hover_movie_card.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
-import 'package:streaming_app/search_results.dart';
+import 'package:streaming_app/modules/search_results.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
