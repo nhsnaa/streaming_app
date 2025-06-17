@@ -71,21 +71,35 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        foregroundColor: Colors.white, // <-- this sets the back icon and title color
-        title: TextField(
-          style: const TextStyle(color: Colors.white),
-          cursorColor: Colors.white,
-          decoration: InputDecoration(
-            hintText: 'Search watch later...',
-            hintStyle: const TextStyle(color: Colors.white54),
-            border: InputBorder.none,
-            prefixIcon: const Icon(Icons.search, color: Colors.white54),
-          ),
-          onChanged: (value) {
-            setState(() => _searchQuery = value);
-          },
-        ),
+        foregroundColor: Colors.white,
+        title: const Text('Watch Later'),
         actions: [
+          SizedBox(
+            width: 200,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextField(
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() => _searchQuery = value);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           PopupMenuButton<String>(
             onSelected: (value) {
               setState(() {
@@ -109,6 +123,7 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
           ),
         ],
       ),
+
       body: isEmpty
           ? const Center(
               child: Text(

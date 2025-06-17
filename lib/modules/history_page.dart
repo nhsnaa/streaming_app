@@ -129,22 +129,37 @@ class _HistoryPageState extends State<HistoryPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: TextField(
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: 'Search history...',
-            hintStyle: const TextStyle(color: Colors.white54),
-            border: InputBorder.none,
-            prefixIcon: const Icon(Icons.search, color: Colors.white54),
-          ),
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-              _applyFilters();
-            });
-          },
-        ),
+        title: const Text('History'),
         actions: [
+          // 🔍 Search field on right
+          SizedBox(
+            width: 200,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: TextField(
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                    _applyFilters();
+                  });
+                },
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: _filteredHistory.isNotEmpty ? _clearAll : null,
@@ -153,7 +168,6 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       body: Column(
         children: [
-          // 🔘 Filter chips
           Padding(
             padding: const EdgeInsets.all(10),
             child: Wrap(
@@ -177,8 +191,6 @@ class _HistoryPageState extends State<HistoryPage> {
               }).toList(),
             ),
           ),
-
-          // 📃 History list or empty message
           Expanded(
             child: _filteredHistory.isEmpty
                 ? Center(
@@ -192,7 +204,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () {
-                           Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                           },
                           icon: const Icon(Icons.play_arrow),
                           label: const Text('Start Watching'),
@@ -252,7 +264,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             icon: const Icon(Icons.delete_outline, color: Colors.white),
                             onPressed: () => _removeItem(index),
                           ),
-                         onTap: () async {
+                          onTap: () async {
                             showDialog(
                               context: context,
                               builder: (_) => MovieInfoDialog(item: item),
