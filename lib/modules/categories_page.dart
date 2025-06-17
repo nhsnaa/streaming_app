@@ -32,49 +32,52 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   // Load genres and initial content based on selected type (Movies or TV)
   Future<void> _loadGenresAndContent() async {
-    setState(() => isLoading = true);
+  if (mounted) setState(() => isLoading = true);
 
-    try {
-      if (selectedType == 'Movies') {
-        movieGenres = await TMDBService().fetchMovieGenres();
-        if (movieGenres.isNotEmpty) {
-          selectedGenre = movieGenres[0]['name'];
-          selectedGenreId = movieGenres[0]['id'];
-          await _loadContentByGenre(selectedGenreId);
-        }
-      } else {
-        tvGenres = await TMDBService().fetchTVGenres();
-        if (tvGenres.isNotEmpty) {
-          selectedGenre = tvGenres[0]['name'];
-          selectedGenreId = tvGenres[0]['id'];
-          await _loadContentByGenre(selectedGenreId);
-        }
+  try {
+    if (selectedType == 'Movies') {
+      movieGenres = await TMDBService().fetchMovieGenres();
+      if (movieGenres.isNotEmpty) {
+        selectedGenre = movieGenres[0]['name'];
+        selectedGenreId = movieGenres[0]['id'];
+        await _loadContentByGenre(selectedGenreId);
       }
-    } catch (e) {
-      print('Error loading genres or content: $e');
+    } else {
+      tvGenres = await TMDBService().fetchTVGenres();
+      if (tvGenres.isNotEmpty) {
+        selectedGenre = tvGenres[0]['name'];
+        selectedGenreId = tvGenres[0]['id'];
+        await _loadContentByGenre(selectedGenreId);
+      }
     }
-
-    setState(() => isLoading = false);
+  } catch (e) {
+    print('Error loading genres or content: $e');
   }
+
+  if (mounted) setState(() => isLoading = false);
+}
 
   // Load movie/TV content by genre
   Future<void> _loadContentByGenre(int genreId) async {
-    setState(() => isLoading = true);
+  if (mounted) setState(() => isLoading = true);
 
-    try {
-      final fetched = selectedType == 'Movies'
-          ? await TMDBService().fetchMoviesByGenre(genreId)
-          : await TMDBService().fetchTVByGenre(genreId);
+  try {
+    final fetched = selectedType == 'Movies'
+        ? await TMDBService().fetchMoviesByGenre(genreId)
+        : await TMDBService().fetchTVByGenre(genreId);
 
+    if (mounted) {
       setState(() {
         items = fetched.where((m) => m['poster_path'] != null).toList();
       });
-    } catch (e) {
-      print('Error loading content: $e');
     }
-
-    setState(() => isLoading = false);
+  } catch (e) {
+    print('Error loading content: $e');
   }
+
+  if (mounted) setState(() => isLoading = false);
+}
+
 
   // Show a bottom sheet to pick genre (Netflix-style)
   void _showGenrePicker(BuildContext context) {
