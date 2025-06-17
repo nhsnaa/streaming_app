@@ -16,6 +16,10 @@ class _FavouritePageState extends State<FavouritePage>
   List<dynamic> _movieFavorites = [];
   List<dynamic> _tvFavorites = [];
 
+  String _searchQuery = '';
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +49,14 @@ class _FavouritePageState extends State<FavouritePage>
     await _loadFavorites();
   }
 
+  List<dynamic> _filterItems(List<dynamic> items) {
+    if (_searchQuery.isEmpty) return items;
+    return items.where((item) {
+      final title = item['title'] ?? item['name'] ?? '';
+      return title.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -52,20 +64,49 @@ class _FavouritePageState extends State<FavouritePage>
       child: Scaffold(
         backgroundColor: Colors.black87,
         appBar: AppBar(
-          title: const Text('Favourites'),
           backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-         bottom: TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Movies'),
-              Tab(text: 'TV Shows'),
-            ],
-            labelColor: Colors.blueAccent,            // Selected tab text color
-            unselectedLabelColor: Colors.white54,    // Unselected tab text color
-            indicatorColor: Colors.blueAccent,        // Line under the selected tab
-          ),
+          foregroundColor: Colors.white60,
+          title: _isSearching
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Search favorites...',
+                    hintStyle: TextStyle(color: Colors.white54),
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                )
+              : const Text('Favourites', 
+                style: TextStyle(color: Colors.white
+                ),
+              ),
           actions: [
+            if (_isSearching)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = false;
+                    _searchQuery = '';
+                    _searchController.clear();
+                  });
+                },
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = true;
+                  });
+                },
+              ),
             if (_movieFavorites.isNotEmpty || _tvFavorites.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.delete_forever),
@@ -80,12 +121,22 @@ class _FavouritePageState extends State<FavouritePage>
                 },
               ),
           ],
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Movies'),
+              Tab(text: 'TV Shows'),
+            ],
+            labelColor: Colors.blueAccent,
+            unselectedLabelColor: Colors.white54,
+            indicatorColor: Colors.blueAccent,
+          ),
         ),
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildFavoritesSection(_movieFavorites, 'Movies'),
-            _buildFavoritesSection(_tvFavorites, 'TV Shows'),
+            _buildFavoritesSection(_filterItems(_movieFavorites), 'Movies'),
+            _buildFavoritesSection(_filterItems(_tvFavorites), 'TV Shows'),
           ],
         ),
       ),
@@ -122,7 +173,7 @@ class _FavouritePageState extends State<FavouritePage>
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 270,
+          height: 230,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -135,8 +186,8 @@ class _FavouritePageState extends State<FavouritePage>
                   children: [
                     HoverMovieCard(
                       item: item,
-                      width: 160,
-                      height: 240,
+                      width: 120,
+                      height: 200,
                       onTap: () async {
                         final shouldRemove = await showDialog<bool>(
                           context: context,
