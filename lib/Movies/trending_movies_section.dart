@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
-import 'package:streaming_app/widgets/detail_page.dart';
 import 'package:streaming_app/services/watchlist_manager.dart';
+import 'package:streaming_app/widgets/movie_info_dialog.dart';
 
 
 class TrendingPage extends StatefulWidget {
@@ -95,10 +95,12 @@ class _TrendingPageState extends State<TrendingPage> {
                 itemBuilder: (context, index) {
                   final movie = trendingMovies[index];
                   return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => DetailPage(item: movie)),
-                    ),
+                     onTap: () async {
+                      showDialog(
+                        context: context,
+                        builder: (_) => MovieInfoDialog(item: movie),
+                      );
+                    },
                     child: Container(
                       width: 300,
                       margin: const EdgeInsets.only(right: 12),

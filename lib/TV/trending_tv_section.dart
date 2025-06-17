@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/tmdb_service1.dart';
 import 'package:streaming_app/services/watchlist_manager.dart';
-import 'package:streaming_app/widgets/detail_page.dart';
+import 'package:streaming_app/widgets/movie_info_dialog.dart';
 
 class TrendingTVPage extends StatefulWidget {
   const TrendingTVPage({super.key});
@@ -94,10 +94,12 @@ class _TrendingTVPageState extends State<TrendingTVPage> {
                 itemBuilder: (context, index) {
                   final tv = trendingTV[index];
                   return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => DetailPage(item: tv)),
-                    ),
+                     onTap: () async {
+                      showDialog(
+                        context: context,
+                        builder: (_) => MovieInfoDialog(item: tv),
+                      );
+                    },
                     child: Container(
                       width: 300,
                       margin: const EdgeInsets.only(right: 12),
