@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/favorites_manager.dart';
 import 'package:streaming_app/widgets/movie_info_dialog.dart';
+import 'package:streaming_app/widgets/hover_movie_card.dart';
 
 class FavouritePage extends StatefulWidget {
   const FavouritePage({super.key});
@@ -49,14 +50,20 @@ class _FavouritePageState extends State<FavouritePage>
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black87,
         appBar: AppBar(
           title: const Text('Favourites'),
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
-          bottom: TabBar(
+         bottom: TabBar(
             controller: _tabController,
-            tabs: const [Tab(text: 'Movies'), Tab(text: 'TV Shows')],
+            tabs: const [
+              Tab(text: 'Movies'),
+              Tab(text: 'TV Shows'),
+            ],
+            labelColor: Colors.blueAccent,            // Selected tab text color
+            unselectedLabelColor: Colors.white54,    // Unselected tab text color
+            indicatorColor: Colors.blueAccent,        // Line under the selected tab
           ),
           actions: [
             if (_movieFavorites.isNotEmpty || _tvFavorites.isNotEmpty)
@@ -77,15 +84,15 @@ class _FavouritePageState extends State<FavouritePage>
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildGrid(_movieFavorites),
-            _buildGrid(_tvFavorites),
+            _buildFavoritesSection(_movieFavorites, 'Movies'),
+            _buildFavoritesSection(_tvFavorites, 'TV Shows'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildGrid(List<dynamic> items) {
+  Widget _buildFavoritesSection(List<dynamic> items, String title) {
     if (items.isEmpty) {
       return const Center(
         child: Padding(
@@ -99,105 +106,66 @@ class _FavouritePageState extends State<FavouritePage>
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: GridView.builder(
-        itemCount: items.length,
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 160,
-          mainAxisSpacing: 20,
-          crossAxisSpacing: 20,
-          childAspectRatio: 0.6,
-        ),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          final posterPath = item['poster_path'];
-          final title = item['title'] ?? item['name'] ?? 'No title';
-
-          return GestureDetector(
-            onTap: () async {
-              final shouldRemove = await showDialog<bool>(
-                context: context,
-                builder: (_) => MovieInfoDialog(item: item),
-              );
-
-              if (shouldRemove == true) {
-                _removeFavorite(item);
-              }
-            },
-
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                children: [
-                  // Poster image
-                  posterPath != null
-                      ? Image.network(
-                          'https://image.tmdb.org/t/p/w500$posterPath',
-                          height: double.infinity,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          color: Colors.grey[800],
-                          child: const Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color: Colors.white54,
-                              size: 50,
-                            ),
-                          ),
-                        ),
-
-                  // ❤️ Favorite icon
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () => _removeFavorite(item),
-                      child: const Icon(
-                        Icons.favorite,
-                        color: Colors.redAccent,
-                        size: 28,
-                      ),
-                    ),
-                  ),
-
-                  // Title overlay
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.75),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(12),
-                          bottomRight: Radius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    return ListView(
+      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Text(
+            'Your $title',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 270,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Stack(
+                  children: [
+                    HoverMovieCard(
+                      item: item,
+                      width: 160,
+                      height: 240,
+                      onTap: () async {
+                        final shouldRemove = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => MovieInfoDialog(item: item),
+                        );
+                        if (shouldRemove == true) {
+                          _removeFavorite(item);
+                        }
+                      },
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () => _removeFavorite(item),
+                        child: const Icon(
+                          Icons.favorite,
+                          color: Colors.redAccent,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
