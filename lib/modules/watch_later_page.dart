@@ -12,7 +12,8 @@ class WatchLaterPage extends StatefulWidget {
 class _WatchLaterPageState extends State<WatchLaterPage> {
   List<Map<String, dynamic>> _movies = [];
   List<Map<String, dynamic>> _tvShows = [];
-  String _sortOption = 'title'; // Default sort option
+  String _sortOption = 'title';
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -20,7 +21,6 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
     _loadWatchlist();
   }
 
-  // Load the watchlist and group into movies and TV shows
   Future<void> _loadWatchlist() async {
     final list = await WatchlistManager.getWatchlist();
     List<Map<String, dynamic>> movies = [];
@@ -43,7 +43,6 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
     });
   }
 
-  // Sort list by title or rating
   void _sortList(List<Map<String, dynamic>> list) {
     list.sort((a, b) {
       if (_sortOption == 'rating') {
@@ -56,6 +55,14 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
     });
   }
 
+  List<Map<String, dynamic>> _applySearch(List<Map<String, dynamic>> list) {
+    if (_searchQuery.isEmpty) return list;
+    return list.where((item) {
+      final title = (item['title'] ?? item['name'] ?? '').toLowerCase();
+      return title.contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEmpty = _movies.isEmpty && _tvShows.isEmpty;
@@ -63,30 +70,40 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Watch Later'),
         backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.white, // <-- this sets the back icon and title color
+        title: TextField(
+          style: const TextStyle(color: Colors.white),
+          cursorColor: Colors.white,
+          decoration: InputDecoration(
+            hintText: 'Search watch later...',
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: InputBorder.none,
+            prefixIcon: const Icon(Icons.search, color: Colors.white54),
+          ),
+          onChanged: (value) {
+            setState(() => _searchQuery = value);
+          },
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
-              setState(() => _sortOption = value);
-              _sortList(_movies);
-              _sortList(_tvShows);
+              setState(() {
+                _sortOption = value;
+                _sortList(_movies);
+                _sortList(_tvShows);
+              });
             },
             icon: const Icon(Icons.sort, color: Colors.white),
             color: Colors.grey[900],
             itemBuilder: (_) => [
               const PopupMenuItem(
                 value: 'title',
-                child: Text('Sort by Title',
-                style: TextStyle(color: Colors.white70)
-                ),
+                child: Text('Sort by Title', style: TextStyle(color: Colors.white70)),
               ),
               const PopupMenuItem(
                 value: 'rating',
-                child: Text('Sort by Rating', 
-                style: TextStyle(color: Colors.white70)
-                ),
+                child: Text('Sort by Rating', style: TextStyle(color: Colors.white70)),
               ),
             ],
           ),
@@ -101,34 +118,32 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
             )
           : ListView(
               children: [
-                if (_movies.isNotEmpty)
-                  _buildSection('Movies', _movies),
-                if (_tvShows.isNotEmpty)
-                  _buildSection('TV Shows', _tvShows),
+                if (_applySearch(_movies).isNotEmpty)
+                  _buildSection('Movies', _applySearch(_movies)),
+                if (_applySearch(_tvShows).isNotEmpty)
+                  _buildSection('TV Shows', _applySearch(_tvShows)),
               ],
             ),
     );
   }
 
-  // Build section for movies or TV shows
   Widget _buildSection(String title, List<Map<String, dynamic>> list) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, left: 8, right: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
               title,
               style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          // List of items
           ...list.map((item) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -148,13 +163,10 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
                               child: Image.network(
                                 'https://image.tmdb.org/t/p/w92${item['poster_path']}',
                                 width: 60,
-                                
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : const SizedBox(
-                            width: 60,
-                          ),
+                          : const SizedBox(width: 60),
                       Positioned(
                         bottom: 0,
                         child: Container(
@@ -165,7 +177,9 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
                             '${(item['vote_average'] ?? 0).toStringAsFixed(1)} ★',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                                color: Colors.amber, fontSize: 12),
+                              color: Colors.amber,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -176,20 +190,17 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
                     style: const TextStyle(color: Colors.white),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.bookmark_remove_outlined,
-                        color: Colors.white),
+                    icon: const Icon(Icons.bookmark_remove_outlined, color: Colors.white),
                     onPressed: () async {
-                      // Remove item from watchlist and reload
                       await WatchlistManager.removeFromWatchlist(item['id']);
                       _loadWatchlist();
                     },
                   ),
-                  onTap: () async {
-                    // Open MovieInfoDialog
-                      showDialog(
+                  onTap: () {
+                    showDialog(
                       context: context,
                       builder: (_) => MovieInfoDialog(item: item),
-                      );              
+                    );
                   },
                 ),
               )),

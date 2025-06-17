@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const CategoriesPage();
       case 2:
-        return const FavouritesPage();
+        return const FavouritePage();
       case 3:
         return const ProfilePage();
       default:

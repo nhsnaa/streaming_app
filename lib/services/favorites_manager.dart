@@ -1,43 +1,38 @@
-// A simple static class to manage favorite items across the app
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class FavoritesManager {
-  // Internal static list that holds all favorite items (can be movies or TV shows)
-  static final List<dynamic> _favorites = [];
+  static const String _key = 'favorites';
 
-  // Public getter to access the list of favorite items
-  static List<dynamic> get favorites => _favorites;
-
-  // Toggle function: adds item if not present, removes if already in favorites
-  static void toggleFavorite(dynamic item) {
-    if (_favorites.contains(item)) {
-      _favorites.remove(item); // Remove from favorites if already added
-    } else {
-      _favorites.add(item); // Add to favorites
-    }
+  static Future<List<String>> _getFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_key) ?? [];
   }
 
-  // Checks whether a specific item is already marked as favorite
-  static bool isFavorite(dynamic item) {
-    return _favorites.contains(item);
+  static Future<void> addToFavorites(Map<String, dynamic> item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final favorites = await _getFavorites();
+    favorites.add(jsonEncode(item));
+    await prefs.setStringList(_key, favorites);
   }
 
-  // Removes a specific item from favorites
-  static void removeFavorite(dynamic item) {
-    _favorites.remove(item);
+  static Future<void> removeFromFavorites(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final favorites = await _getFavorites();
+    favorites.removeWhere((item) => jsonDecode(item)['id'] == id);
+    await prefs.setStringList(_key, favorites);
   }
 
-  // Clears all items from the favorites list
-  static void clearFavorites() {
-    _favorites.clear();
+  static Future<bool> isInFavorites(int id) async {
+    final favorites = await _getFavorites();
+    return favorites.any((item) => jsonDecode(item)['id'] == id);
   }
 
-  // Sorts the favorites list alphabetically by title or name
-  static void sortFavorites() {
-    _favorites.sort((a, b) {
-      final aTitle = a['title'] ?? a['name'] ?? '';
-      final bTitle = b['title'] ?? b['name'] ?? '';
-      return aTitle.toLowerCase().compareTo(bTitle.toLowerCase());
-    });
+  static Future<List<Map<String, dynamic>>> getAllFavorites() async {
+    final favorites = await _getFavorites();
+    return favorites
+        .map((item) => jsonDecode(item))
+        .cast<Map<String, dynamic>>()
+        .toList();
   }
 }
-
-

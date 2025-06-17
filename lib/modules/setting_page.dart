@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streaming_app/modules/feedback_page.dart';
+import 'package:streaming_app/modules/history_page.dart';
 import 'package:streaming_app/services/user_data.dart';
 import 'package:streaming_app/modules/watch_later_page.dart';
 
@@ -29,25 +30,6 @@ class SettingsPage extends StatelessWidget {
               Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Watch History placeholder
-  void _showHistory(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Watch History', style: TextStyle(color: Colors.white)),
-        content: const Text('This is a placeholder for your watch history.',
-            style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Colors.blueAccent)),
           ),
         ],
       ),
@@ -146,7 +128,12 @@ class SettingsPage extends StatelessWidget {
           _buildTile(
             icon: Icons.history,
             title: 'History',
-            onTap: () => _showHistory(context),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HistoryPage()),
+              );
+            },
           ),
 
           const SizedBox(height: 16),

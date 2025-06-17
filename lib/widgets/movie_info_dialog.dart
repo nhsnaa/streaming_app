@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/watchlist_manager.dart';
+import 'package:streaming_app/services/favorites_manager.dart'; // ⬅️ new
 import '../services/tmdb_service1.dart';
 import '../widgets/detail_page.dart';
 
@@ -15,7 +17,7 @@ class MovieInfoDialog extends StatefulWidget {
 class _MovieInfoDialogState extends State<MovieInfoDialog> {
   Map<int, String> genreMap = {};
   bool isLoading = true;
-  bool _isExpanded = false; // 🔽 Controls overview expansion
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -94,14 +96,13 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
 
                         const SizedBox(width: 20),
 
-                        // 📝 Right: Info Section
+                        // 📝 Right: Info
                         Expanded(
                           flex: 3,
                           child: SingleChildScrollView(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // 🎬 Title
                                 Text(
                                   title,
                                   style: const TextStyle(
@@ -112,8 +113,6 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 ),
                                 const SizedBox(height: 12),
 
-                                //Text('Release: ${item['release_date']}', style: TextStyle(color: Colors.white70)),
-                                // ℹ️ Metadata (Release, Rating, Lang, Genre)
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -126,7 +125,6 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
 
                                 const SizedBox(height: 16),
 
-                                // 📄 Overview Section with Read More
                                 const Text(
                                   'Overview:',
                                   style: TextStyle(
@@ -139,13 +137,13 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 Text(
                                   overview,
                                   maxLines: _isExpanded ? null : 4,
-                                  overflow:
-                                      _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                                  style:
-                                      const TextStyle(color: Colors.white70, height: 1.5),
+                                  overflow: _isExpanded
+                                      ? TextOverflow.visible
+                                      : TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Colors.white70, height: 1.5),
                                 ),
 
-                                // 🔽 Read More Toggle
                                 TextButton(
                                   onPressed: () {
                                     setState(() {
@@ -154,14 +152,12 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                   },
                                   child: Text(
                                     _isExpanded ? 'Show less ▲' : 'Read more ▼',
-                                    style: const TextStyle(
-                                        color: Colors.lightBlueAccent),
+                                    style: const TextStyle(color: Colors.lightBlueAccent),
                                   ),
                                 ),
 
                                 const SizedBox(height: 12),
 
-                                // ▶️ Play Trailer Button
                                 ElevatedButton.icon(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.lightBlueAccent,
@@ -185,7 +181,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                       ],
                     ),
 
-                    // 🔖 Floating Bookmark Icon (Top Right)
+                    // 🔖 Bookmark Icon
                     Positioned(
                       top: -5,
                       right: -5,
@@ -217,6 +213,37 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                         },
                       ),
                     ),
+
+                    // ❤️ Favorite Icon
+                    Positioned(
+                      top: 45,
+                      right: -5,
+                      child: FutureBuilder<bool>(
+                        future: FavoritesManager.isInFavorites(item['id']),
+                        builder: (context, snapshot) {
+                          final isFavorite = snapshot.data ?? false;
+                          return Material(
+                            color: const Color.fromARGB(255, 41, 38, 38),
+                            borderRadius: BorderRadius.circular(12),
+                            child: IconButton(
+                              icon: Icon(
+                                isFavorite ? Icons.favorite : Icons.favorite_border,
+                                color: Colors.pinkAccent,
+                                size: 24,
+                              ),
+                              onPressed: () async {
+                                if (isFavorite) {
+                                  await FavoritesManager.removeFromFavorites(item['id']);
+                                } else {
+                                  await FavoritesManager.addToFavorites(item);
+                                }
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
         ),
@@ -224,7 +251,6 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
     );
   }
 
-  // 🔧 Helper widget for label + value
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -235,7 +261,6 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
     );
   }
 
-  // ⭐ Helper widget for row with icon and text (e.g., rating)
   Widget _buildDetailRowWithIcon(IconData icon, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),

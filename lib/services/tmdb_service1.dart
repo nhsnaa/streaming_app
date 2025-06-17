@@ -270,6 +270,14 @@ Future<String?> fetchYoutubeTVTrailer(String tvId) async {
   // No trailer found
   return null;
 }
-
+Map<String, dynamic> normalizeItem(Map<String, dynamic> item) {
+  final updatedItem = Map<String, dynamic>.from(item);
+  updatedItem['media_type'] ??= item.containsKey('title')
+      ? 'movie'
+      : item.containsKey('name')
+          ? 'tv'
+          : 'unknown';
+  return updatedItem;
+}
 }
 

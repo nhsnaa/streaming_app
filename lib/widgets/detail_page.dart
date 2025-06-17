@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../services/tmdb_service1.dart';
+import '../services/history_manager.dart'; // ✅ Import the history manager
 
 class DetailPage extends StatefulWidget {
   final dynamic item;
@@ -21,33 +22,48 @@ class _DetailPageState extends State<DetailPage> {
   @override
   void initState() {
     super.initState();
+    _addToHistory(); // ✅ Save item to history when detail page opens
     _loadVideo();
   }
 
-  Future<void> _loadVideo() async {
-    final isMovie = widget.item['title'] != null;
-    final id = widget.item['id'].toString();
-
-    final key = isMovie
-        ? await _tmdbService.fetchYoutubeTrailer(id)
-        : await _tmdbService.fetchYoutubeTVTrailer(id);
-
-    _hasTriedVideo = true;
-
-    if (key != null) {
-      _controller = YoutubePlayerController.fromVideoId(
-        videoId: key,
-        autoPlay: false,
-        params: const YoutubePlayerParams(
-          showFullscreenButton: true,
-          showControls: true,
-        ),
-      );
-      setState(() => _isVideoReady = true);
-    } else {
-      setState(() => _isVideoReady = false);
+  // ✅ Add item to history
+  Future<void> _addToHistory() async {
+    try {
+      await HistoryManager.addToHistory(widget.item);
+      print("🕓 Added to history: ${widget.item['title'] ?? widget.item['name']}");
+    } catch (e) {
+      print("⚠️ Failed to add to history: $e");
     }
   }
+
+  // 🔁 Load YouTube trailer (movie or TV show)
+  Future<void> _loadVideo() async {
+  final isMovie = widget.item['title'] != null;
+  final id = widget.item['id'].toString();
+
+  final key = isMovie
+      ? await _tmdbService.fetchYoutubeTrailer(id)
+      : await _tmdbService.fetchYoutubeTVTrailer(id);
+
+  _hasTriedVideo = true;
+
+  if (!mounted) return; // 🛡 Prevent setState after dispose
+
+  if (key != null) {
+    _controller = YoutubePlayerController.fromVideoId(
+      videoId: key,
+      autoPlay: false,
+      params: const YoutubePlayerParams(
+        showFullscreenButton: true,
+        showControls: true,
+      ),
+    );
+    setState(() => _isVideoReady = true);
+  } else {
+    setState(() => _isVideoReady = false);
+  }
+}
+
 
   @override
   void dispose() {
