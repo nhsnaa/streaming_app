@@ -227,15 +227,19 @@ class _ProfilePageState extends State<ProfilePage> {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      _selectedBackground,
-                      width: double.infinity,
-                      height: 300,
-                      fit: BoxFit.cover,
+                  // ✅ Background image now maintains a clean 16:9 aspect ratio
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        _selectedBackground,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
+                  // Settings icon at top-right
                   Positioned(
                     top: 5,
                     right: 5,
@@ -248,6 +252,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       },
                     ),
                   ),
+                  // ✅ Profile avatar with smaller gradient border
                   Positioned(
                     bottom: -40,
                     left: 20,
@@ -258,13 +263,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           colors: [Colors.blueAccent, Colors.purpleAccent],
                         ),
                       ),
-                      padding: const EdgeInsets.all(3),
+                      padding: const EdgeInsets.all(1), // very thin border
                       child: CircleAvatar(
-                        radius: 50,
+                        radius: 32, // smaller profile picture
                         backgroundImage: AssetImage(_selectedAvatar),
                       ),
                     ),
                   ),
+                  // Edit icon button for avatar/background
                   Positioned(
                     bottom: -2,
                     right: 0,
