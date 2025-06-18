@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:streaming_app/services/watchlist_manager.dart';
-import 'package:streaming_app/services/favorites_manager.dart'; // ⬅️ new
+import 'package:streaming_app/services/favorites_manager.dart';
 import '../services/tmdb_service1.dart';
 import '../widgets/detail_page.dart';
 
@@ -31,6 +30,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
         ? await TMDBService().fetchMovieGenres()
         : await TMDBService().fetchTVGenres();
 
+    if (!mounted) return;
     setState(() {
       genreMap = {for (var g in genres) g['id']: g['name']};
       isLoading = false;
@@ -40,6 +40,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     final title = item['title'] ?? item['name'] ?? 'No title';
     final overview = item['overview'] ?? 'No overview';
@@ -55,150 +56,140 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
         genreIds.map((id) => genreMap[id] ?? 'Unknown').toList();
     final String genreText = genreNames.join(', ');
 
-    return Dialog(
-      backgroundColor: const Color.fromARGB(255, 41, 38, 38),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
-          width: 600,
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Stack(
-                  clipBehavior: Clip.none,
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.95,
+      maxChildSize: 0.95,
+      minChildSize: 0.6,
+      builder: (context, scrollController) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Color.fromARGB(255, 41, 38, 38),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        // 🔳 Left: Poster
-                        Expanded(
-                          flex: 2,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              height: double.infinity,
-                              color: Colors.grey[900],
-                              child: posterPath != null
-                                  ? Image.network(
-                                      'https://image.tmdb.org/t/p/w500$posterPath',
-                                      fit: BoxFit.cover,
-                                    )
-                                  : const Center(
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.white54,
-                                        size: 50,
-                                      ),
-                                    ),
-                            ),
-                          ),
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[600],
+                          borderRadius: BorderRadius.circular(10),
                         ),
-
-                        const SizedBox(width: 20),
-
-                        // 📝 Right: Info
-                        Expanded(
-                          flex: 3,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildDetailRow('Release Date:', releaseDate),
-                                    _buildDetailRowWithIcon(Icons.star, '$voteAverage/10'),
-                                    _buildDetailRow('Language:', originalLanguage),
-                                    _buildDetailRow('Genres:', genreText),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                const Text(
-                                  'Overview:',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
-                                ),
-                                const SizedBox(height: 8),
-
-                                Text(
-                                  overview,
-                                  maxLines: _isExpanded ? null : 4,
-                                  overflow: _isExpanded
-                                      ? TextOverflow.visible
-                                      : TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      color: Colors.white70, height: 1.5),
-                                ),
-
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _isExpanded = !_isExpanded;
-                                    });
-                                  },
-                                  child: Text(
-                                    _isExpanded ? 'Show less ▲' : 'Read more ▼',
-                                    style: const TextStyle(color: Colors.lightBlueAccent),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.lightBlueAccent,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context, true);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => DetailPage(item: item)),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.play_arrow, color: Colors.black),
-                                  label: const Text("Play Trailer",
-                                      style: TextStyle(color: Colors.black)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
 
-                    // 🔖 Bookmark Icon
-                    Positioned(
-                      top: -5,
-                      right: -5,
-                      child: FutureBuilder<bool>(
-                        future: WatchlistManager.isInWatchlist(item['id']),
-                        builder: (context, snapshot) {
-                          final isSaved = snapshot.data ?? false;
-                          return Material(
-                            color: const Color.fromARGB(255, 41, 38, 38),
-                            borderRadius: BorderRadius.circular(12),
-                            child: IconButton(
+                    // Poster
+                    if (posterPath != null)
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            'https://image.tmdb.org/t/p/w500$posterPath',
+                            width: screenWidth * 0.6,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 16),
+
+                    // Title
+                    Text(
+                      title,
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    _buildDetailRow('Release Date:', releaseDate),
+                    _buildDetailRowWithIcon(Icons.star, '$voteAverage/10'),
+                    _buildDetailRow('Language:', originalLanguage),
+                    _buildDetailRow('Genres:', genreText),
+
+                    const SizedBox(height: 14),
+
+                    const Text(
+                      'Overview:',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    const SizedBox(height: 6),
+
+                    Text(
+                      overview,
+                      maxLines: _isExpanded ? null : 4,
+                      overflow: _isExpanded
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
+                      style:
+                          const TextStyle(color: Colors.white70, height: 1.5),
+                    ),
+
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                      child: Text(
+                        _isExpanded ? 'Show less ▲' : 'Read more ▼',
+                        style:
+                            const TextStyle(color: Colors.lightBlueAccent),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlueAccent,
+                        minimumSize: const Size(120, 36),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailPage(item: item),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.play_arrow,
+                          color: Colors.black, size: 20),
+                      label: const Text("Play Trailer",
+                          style: TextStyle(color: Colors.black)),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Bookmark & Favorite Icons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FutureBuilder<bool>(
+                          future: WatchlistManager.isInWatchlist(item['id']),
+                          builder: (context, snapshot) {
+                            final isSaved = snapshot.data ?? false;
+                            return IconButton(
                               icon: Icon(
                                 isSaved
                                     ? Icons.bookmark_added
                                     : Icons.bookmark_add_outlined,
                                 color: Colors.redAccent,
-                                size: 25,
+                                size: 24,
                               ),
                               onPressed: () async {
                                 if (isSaved) {
@@ -208,26 +199,19 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 }
                                 setState(() {});
                               },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    // ❤️ Favorite Icon
-                    Positioned(
-                      top: 45,
-                      right: -5,
-                      child: FutureBuilder<bool>(
-                        future: FavoritesManager.isInFavorites(item['id']),
-                        builder: (context, snapshot) {
-                          final isFavorite = snapshot.data ?? false;
-                          return Material(
-                            color: const Color.fromARGB(255, 41, 38, 38),
-                            borderRadius: BorderRadius.circular(12),
-                            child: IconButton(
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        FutureBuilder<bool>(
+                          future: FavoritesManager.isInFavorites(item['id']),
+                          builder: (context, snapshot) {
+                            final isFavorite = snapshot.data ?? false;
+                            return IconButton(
                               icon: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
                                 color: Colors.pinkAccent,
                                 size: 24,
                               ),
@@ -239,14 +223,14 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
                                 }
                                 setState(() {});
                               },
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-        ),
+              ),
       ),
     );
   }
@@ -256,7 +240,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         '$label $value',
-        style: const TextStyle(color: Colors.white70),
+        style: const TextStyle(color: Colors.white70, fontSize: 14),
       ),
     );
   }
@@ -267,7 +251,7 @@ class _MovieInfoDialogState extends State<MovieInfoDialog> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.amber, size: 18),
+          Icon(icon, color: Colors.amber, size: 16),
           const SizedBox(width: 4),
           Text(value, style: const TextStyle(color: Colors.white70)),
         ],
