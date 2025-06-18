@@ -74,30 +74,77 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
         foregroundColor: Colors.white,
         title: const Text('Watch Later'),
         actions: [
-          SizedBox(
-            width: 200,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextField(
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  hintStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+              if (!isSmallScreen) {
+                return SizedBox(
+                  width: 200,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: TextField(
+                      style: const TextStyle(color: Colors.white),
+                      cursorColor: Colors.white,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.grey[800],
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                        prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() => _searchQuery = value);
+                      },
+                    ),
                   ),
-                ),
-                onChanged: (value) {
-                  setState(() => _searchQuery = value);
-                },
-              ),
-            ),
+                );
+              } else {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () async {
+                    String tempQuery = '';
+                    final result = await showDialog<String>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: Colors.grey[900],
+                        title: const Text('Search Watch Later', style: TextStyle(color: Colors.white)),
+                        content: TextField(
+                          style: const TextStyle(color: Colors.white),
+                          autofocus: true,
+                          decoration: const InputDecoration(
+                            hintText: 'Search...',
+                            hintStyle: TextStyle(color: Colors.white54),
+                          ),
+                          onChanged: (val) => tempQuery = val,
+                          onSubmitted: (val) => Navigator.pop(context, val),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, tempQuery),
+                            child: const Text('Search'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        _searchQuery = result;
+                      });
+                    }
+                  },
+                );
+              }
+            },
           ),
           const SizedBox(width: 8),
           PopupMenuButton<String>(
@@ -123,6 +170,7 @@ class _WatchLaterPageState extends State<WatchLaterPage> {
           ),
         ],
       ),
+
 
       body: isEmpty
           ? const Center(

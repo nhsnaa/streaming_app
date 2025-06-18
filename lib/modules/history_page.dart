@@ -38,6 +38,7 @@ class _HistoryPageState extends State<HistoryPage> {
       _applyFilters();
     });
 
+    // Show undo snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Removed ${removed['title'] ?? 'item'}'),
@@ -124,6 +125,8 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 380;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -131,35 +134,76 @@ class _HistoryPageState extends State<HistoryPage> {
         foregroundColor: Colors.white,
         title: const Text('History'),
         actions: [
-          // 🔍 Search field on right
-          SizedBox(
-            width: 200,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextField(
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  hintStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
+          if (!isSmallScreen)
+            SizedBox(
+              width: 180,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextField(
+                  style: const TextStyle(color: Colors.white),
+                  cursorColor: Colors.white,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: const TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                      _applyFilters();
+                    });
+                  },
                 ),
-                onChanged: (value) {
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () async {
+                final result = await showDialog<String>(
+                  context: context,
+                  builder: (context) {
+                    String tempQuery = '';
+                    return AlertDialog(
+                      backgroundColor: Colors.grey[900],
+                      title: const Text('Search History', style: TextStyle(color: Colors.white)),
+                      content: TextField(
+                        style: const TextStyle(color: Colors.white),
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: 'Search...',
+                          hintStyle: TextStyle(color: Colors.white54),
+                        ),
+                        onChanged: (val) => tempQuery = val,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, null),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, tempQuery),
+                          child: const Text('Search'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                if (result != null) {
                   setState(() {
-                    _searchQuery = value;
+                    _searchQuery = result;
                     _applyFilters();
                   });
-                },
-              ),
+                }
+              },
             ),
-          ),
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: _filteredHistory.isNotEmpty ? _clearAll : null,
@@ -168,6 +212,7 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       body: Column(
         children: [
+          // Filter Chips: All, Movie, TV Show
           Padding(
             padding: const EdgeInsets.all(10),
             child: Wrap(
@@ -237,7 +282,8 @@ class _HistoryPageState extends State<HistoryPage> {
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
                                     'https://image.tmdb.org/t/p/w154$posterPath',
-                                    width: 70,
+                                    width: 60,
+                                    height: 90,
                                     fit: BoxFit.cover,
                                   ),
                                 )
@@ -245,6 +291,8 @@ class _HistoryPageState extends State<HistoryPage> {
                           title: Text(
                             title,
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +312,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             icon: const Icon(Icons.delete_outline, color: Colors.white),
                             onPressed: () => _removeItem(index),
                           ),
-                          onTap: () async {
+                          onTap: () {
                             showDialog(
                               context: context,
                               builder: (_) => MovieInfoDialog(item: item),
