@@ -86,7 +86,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Enter your feedback...',
+                    hintText: 'Enter your feedback about this app...',
                     hintStyle: const TextStyle(color: Colors.white38),
                     filled: true,
                     fillColor: const Color(0xFF1C1C1E),
@@ -101,7 +101,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                   ),
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(Icons.send, color: Colors.black),
                   label: const Text('Submit', style: TextStyle(color: Colors.black),
                   ),
                 ),
