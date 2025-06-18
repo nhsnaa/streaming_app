@@ -100,58 +100,53 @@ class _MovieWidgetState extends State<MovieWidget> {
                         ),
                       )
                     : SizedBox(
-                        height: 270, // Increased height to allow hover effects
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Horizontal scroll list of posters
-                            ListView.builder(
-                              controller: _scrollController,
-                              scrollDirection: Axis.horizontal,
-                              clipBehavior: Clip.none, // Important!
-                              padding: const EdgeInsets.symmetric(horizontal: 48),
-                              itemCount: movieShows.length,
-                              itemBuilder: (context, index) {
-                                final show = movieShows[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 16.0),
-                                  child: HoverMovieCard(
-                                    item: show,
-                                    height: 200,
-                                    width: 140,
-                                    onTap: () async {
-                                      showDialog(
-                                      context: context,
-                                      builder: (_) => MovieInfoDialog(item: show),
-                                    );
-                                  },
-                                  ),
-                                );
-                              },
-                            ),
-
-                            // Left scroll button
-                            Positioned(
-                              left: 8,
-                              top: 80,
-                              child: _ScrollButton(
-                                icon: Icons.arrow_back_ios_new_rounded,
-                                onTap: _scrollLeft,
-                              ),
-                            ),
-
-                            // Right scroll button
-                            Positioned(
-                              right: 8,
-                              top: 80,
-                              child: _ScrollButton(
-                                icon: Icons.arrow_forward_ios_rounded,
-                                onTap: _scrollRight,
-                              ),
-                            ),
-                          ],
+              height: 270,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none, // Must be none to allow hover scale/translate
+                    padding: const EdgeInsets.symmetric(horizontal: 48),
+                    itemCount: movieShows.length,
+                    itemBuilder: (context, index) {
+                      final show = movieShows[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: HoverMovieCard(
+                          item: show,
+                          height: 200,
+                          width: 140,
+                          onTap: () async {
+                            showDialog(
+                              context: context,
+                              builder: (_) => MovieInfoDialog(item: show),
+                            );
+                          },
                         ),
-                      ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    left: 8,
+                    top: 100, // 🔧 Adjusted scroll button to vertically center better
+                    child: _ScrollButton(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: _scrollLeft,
+                    ),
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 100,
+                    child: _ScrollButton(
+                      icon: Icons.arrow_forward_ios_rounded,
+                      onTap: _scrollRight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

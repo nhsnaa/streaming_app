@@ -100,15 +100,15 @@ class _TVWidgetState extends State<TVWidget> {
                         ),
                       )
                     : SizedBox(
-                        height: 270, // Increased height to allow hover effects
+                        height: 270, // Enough height for hover animation
                         child: Stack(
-                          clipBehavior: Clip.none,
+                          clipBehavior: Clip.none, // Allow hover overflow
                           children: [
-                            // Horizontal scroll list of posters
+                            // Horizontal scroll list of TV posters
                             ListView.builder(
                               controller: _scrollController,
                               scrollDirection: Axis.horizontal,
-                              clipBehavior: Clip.none, // Important!
+                              clipBehavior: Clip.none, // Keep hover effects visible
                               padding: const EdgeInsets.symmetric(horizontal: 48),
                               itemCount: TVShows.length,
                               itemBuilder: (context, index) {
@@ -119,12 +119,12 @@ class _TVWidgetState extends State<TVWidget> {
                                     item: show,
                                     height: 200,
                                     width: 140,
-                                   onTap: () async {
+                                    onTap: () async {
                                       showDialog(
-                                      context: context,
-                                      builder: (_) => MovieInfoDialog(item: show),
-                                    );
-                                  },
+                                        context: context,
+                                        builder: (_) => MovieInfoDialog(item: show),
+                                      );
+                                    },
                                   ),
                                 );
                               },
@@ -159,7 +159,7 @@ class _TVWidgetState extends State<TVWidget> {
   }
 }
 
-// Scroll button widget with elevation and circular shape
+// Reusable circular scroll button widget
 class _ScrollButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
